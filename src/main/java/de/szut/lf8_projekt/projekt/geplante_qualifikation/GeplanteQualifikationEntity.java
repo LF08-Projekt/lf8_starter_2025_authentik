@@ -1,4 +1,4 @@
-package de.szut.lf8_projekt.projekt;
+package de.szut.lf8_projekt.projekt.geplante_qualifikation;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -9,13 +9,13 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "projekt_mitarbeiter")
-public class ProjektMitarbeiterEntity {
+@Table(name="geplante_qualifikation")
+public class GeplanteQualifikationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long projektId;
 
-    private Long mitarbeiterId;
+    private Long qualifikation;
 }
