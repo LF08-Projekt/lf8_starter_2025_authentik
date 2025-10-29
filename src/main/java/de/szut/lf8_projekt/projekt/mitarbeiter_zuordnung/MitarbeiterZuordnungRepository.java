@@ -2,6 +2,8 @@ package de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface MitarbeiterZuordnungRepository extends JpaRepository<MitarbeiterZuordnungEntity, Long> {
-    public MitarbeiterZuordnungEntity findByProjektIdAndMitarbeiterId(Long projektId, Long mitarbeiterId);
+    Optional<MitarbeiterZuordnungEntity> findByProjektIdAndMitarbeiterId(Long projektId, Long mitarbeiterId);
 }
