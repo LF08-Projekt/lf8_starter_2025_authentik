@@ -19,6 +19,8 @@ public class MitarbeiterDto {
     private String telefon;
 
     public String getVollstaendigerName() {
-        return vorname + " " + nachname;
+        String v = (vorname != null && !vorname.trim().isEmpty()) ? vorname : "Unbekannt";
+        String n = (nachname != null && !nachname.trim().isEmpty()) ? nachname : "";
+        return (v + " " + n).trim();
     }
 }
