@@ -4,7 +4,7 @@ import de.szut.lf8_projekt.projekt.ProjektEntity;
 import de.szut.lf8_projekt.projekt.ProjektService;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterDto;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterEntfernenResponseDto;
-import de.szut.lf8_starter.exceptionHandling.ResourceNotFoundException;
+import de.szut.lf8_projekt.exceptionHandling.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,6 +42,14 @@ public class MitarbeiterZuordnungService {
     }
 
     public MitarbeiterEntfernenResponseDto entferneMitarbeiterAusProjekt(Long projektId, Long mitarbeiterId) {
+        // Validiere IDs
+        if (projektId == null || projektId <= 0) {
+            throw new IllegalArgumentException("Projekt-ID muss größer als 0 sein");
+        }
+        if (mitarbeiterId == null || mitarbeiterId <= 0) {
+            throw new IllegalArgumentException("Mitarbeiter-ID muss größer als 0 sein");
+        }
+
         // Prüfe ob Projekt existiert
         ProjektEntity projekt = projektService.readById(projektId);
         if (projekt == null) {
