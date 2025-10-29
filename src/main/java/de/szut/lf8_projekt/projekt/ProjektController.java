@@ -48,7 +48,7 @@ public class ProjektController {
 
     @PostMapping(path="/Projekt")
     public ProjektCreateConfirmationDto create(@RequestBody @Valid ProjektCreateDto dto, @AuthenticationPrincipal Jwt jwt) {
-        String securityTocken = jwt.getTokenValue();
+        String securityTocken = jwt != null ? jwt.getTokenValue() : null;
         if (!this.validationService.validateMitarbeiterId(dto.getVerantwortlicherId(), securityTocken)) {
             throw new ResourceNotFoundException("Mitarbeiter mit der ID " + dto.getVerantwortlicherId() + " existiert nicht!");
         }
