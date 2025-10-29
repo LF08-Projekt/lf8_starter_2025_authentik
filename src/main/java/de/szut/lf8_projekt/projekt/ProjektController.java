@@ -77,20 +77,6 @@ public class ProjektController {
         mitarbeiterZuordnungDto.setMitarbeiterId(mitarbeiter_id);
         mitarbeiterZuordnungDto.setProjektId(projekt_id);
         mitarbeiterZuordnungDto.setQualifikationId(skill.getId());
-    @Operation(summary = "Entfernt einen Mitarbeiter aus einem Projekt")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Mitarbeiter erfolgreich aus Projekt entfernt"),
-        @ApiResponse(responseCode = "404", description = "Projekt, Mitarbeiter oder Zuordnung nicht gefunden", content = @Content),
-        @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
-    })
-    @RequestMapping(value = "/{projektId}/mitarbeiter/{mitarbeiterId}", method = RequestMethod.DELETE)
-    public ResponseEntity<MitarbeiterEntfernenResponseDto> entferneMitarbeiterAusProjekt(
-            @PathVariable Long projektId,
-            @PathVariable Long mitarbeiterId) {
-
-        MitarbeiterEntfernenResponseDto response = mitarbeiterZuordnungService.entferneMitarbeiterAusProjekt(projektId, mitarbeiterId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
 
         MitarbeiterZuordnungEntity mitarbeiterZuordnung = this.mappingService.mapMitarbeiterZuordnungDtoToMitarbeiterZuordnungEntity(mitarbeiterZuordnungDto);
         mitarbeiterZuordnung = this.mitarbeiterZuordnungService.create(mitarbeiterZuordnung);
@@ -104,4 +90,21 @@ public class ProjektController {
 
         return new ResponseEntity<>(map, HttpStatus.OK);
     }
+
+    @Operation(summary = "Entfernt einen Mitarbeiter aus einem Projekt")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Mitarbeiter erfolgreich aus Projekt entfernt"),
+            @ApiResponse(responseCode = "404", description = "Projekt, Mitarbeiter oder Zuordnung nicht gefunden", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
+    })
+    @RequestMapping(value = "/{projektId}/mitarbeiter/{mitarbeiterId}", method = RequestMethod.DELETE)
+    public ResponseEntity<MitarbeiterEntfernenResponseDto> entferneMitarbeiterAusProjekt(
+            @PathVariable Long projektId,
+            @PathVariable Long mitarbeiterId) {
+
+        MitarbeiterEntfernenResponseDto response = mitarbeiterZuordnungService.entferneMitarbeiterAusProjekt(projektId, mitarbeiterId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+
 }
