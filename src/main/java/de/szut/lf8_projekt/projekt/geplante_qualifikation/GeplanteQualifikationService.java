@@ -1,8 +1,11 @@
 package de.szut.lf8_projekt.projekt.geplante_qualifikation;
 
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class GeplanteQualifikationService {
     private final GeplanteQualifikationRepository repository;
 
