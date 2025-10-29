@@ -48,14 +48,14 @@ public class ProjektController {
 
     @PostMapping(path="/Projekt")
     public ProjektCreateConfirmationDto create(@RequestBody @Valid ProjektCreateDto dto, @AuthenticationPrincipal Jwt jwt) {
-        String securityTocken = jwt != null ? jwt.getTokenValue() : null;
-        if (!this.validationService.validateMitarbeiterId(dto.getVerantwortlicherId(), securityTocken)) {
+        String securityToken = jwt != null ? jwt.getTokenValue() : null;
+        if (!this.validationService.validateMitarbeiterId(dto.getVerantwortlicherId(), securityToken)) {
             throw new ResourceNotFoundException("Mitarbeiter mit der ID " + dto.getVerantwortlicherId() + " existiert nicht!");
         }
-        if (!this.validationService.validateKundenId(dto.getKundenId(), securityTocken)) {
+        if (!this.validationService.validateKundenId(dto.getKundenId(), securityToken)) {
             throw new ResourceNotFoundException("Kunde mit der ID + " + dto.getKundenId() + " existiert nicht!");
         }
-        if (!this.validationService.validateQualifications(Arrays.asList(dto.getGeplanteQualifikationen()), securityTocken)) {
+        if (!this.validationService.validateQualifications(Arrays.asList(dto.getGeplanteQualifikationen()), securityToken)) {
             throw new ResourceNotFoundException("Liste der geplanten Qualifikationen enthält eine ungültige Qualifikation");
         }
 
@@ -63,10 +63,12 @@ public class ProjektController {
         projektEntity = this.projektService.create(projektEntity);
 
         List<String> geplanteQualifikationen = new ArrayList<>();
-        for (String qualifikation : dto.getGeplanteQualifikationen()) {
-            GeplanteQualifikationEntity geplanteQualifikationEntity = this.projektMappingService.mapDataToGeplanteQualifikationEntity(projektEntity.getId(), qualifikation);
-            geplanteQualifikationEntity = this.geplanteQualifikationService.create(geplanteQualifikationEntity);
-            geplanteQualifikationen.add(geplanteQualifikationEntity.getQualifikation());
+        if (dto.getGeplanteQualifikationen() != null) {
+            for (String qualifikation : dto.getGeplanteQualifikationen()) {
+                GeplanteQualifikationEntity geplanteQualifikationEntity = this.projektMappingService.mapDataToGeplanteQualifikationEntity(projektEntity.getId(), qualifikation);
+                geplanteQualifikationEntity = this.geplanteQualifikationService.create(geplanteQualifikationEntity);
+                geplanteQualifikationen.add(geplanteQualifikationEntity.getQualifikation());
+            }
         }
 
         ProjektCreateConfirmationDto returnDto = this.projektMappingService.mapProjektEntityToProjektCreateConfirmationDto(projektEntity);
