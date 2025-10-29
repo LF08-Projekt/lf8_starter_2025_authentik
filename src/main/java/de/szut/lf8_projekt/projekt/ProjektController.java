@@ -12,6 +12,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterEntfernenResponseDto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,5 +72,20 @@ public class ProjektController {
         ProjektCreateConfirmationDto returnDto = this.projektMappingService.mapProjektEntityToProjektCreateConfirmationDto(projektEntity);
         returnDto.setGeplanteQualifikationen(geplanteQualifikationen);
         return returnDto;
+    }
+  
+    @Operation(summary = "Entfernt einen Mitarbeiter aus einem Projekt")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Mitarbeiter erfolgreich aus Projekt entfernt"),
+        @ApiResponse(responseCode = "404", description = "Projekt, Mitarbeiter oder Zuordnung nicht gefunden", content = @Content),
+        @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
+    })
+    @RequestMapping(value = "/{projektId}/mitarbeiter/{mitarbeiterId}", method = RequestMethod.DELETE)
+    public ResponseEntity<MitarbeiterEntfernenResponseDto> entferneMitarbeiterAusProjekt(
+            @PathVariable Long projektId,
+            @PathVariable Long mitarbeiterId) {
+
+        MitarbeiterEntfernenResponseDto response = mitarbeiterZuordnungService.entferneMitarbeiterAusProjekt(projektId, mitarbeiterId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
