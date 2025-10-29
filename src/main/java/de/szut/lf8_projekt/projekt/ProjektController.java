@@ -1,18 +1,18 @@
 package de.szut.lf8_projekt.projekt;
 
-import de.szut.lf8_projekt.mapping.MappingService;
+import de.szut.lf8_projekt.mapping.MitarbeiterMappingService;
 import de.szut.lf8_projekt.mitarbeiter.GetMitarbeiterDto;
-import de.szut.lf8_projekt.mitarbeiter.MitarbeiterService;
 import de.szut.lf8_projekt.mitarbeiter.SkillDto;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationEntity;
 import de.szut.lf8_projekt.ValidationService;
 import de.szut.lf8_projekt.exceptionHandling.ResourceNotFoundException;
-import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationEntity;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationService;
+import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterApiService;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungDto;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungEntity;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungService;
 
+import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterDto;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import jakarta.validation.Valid;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,17 +34,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 @RestController
 @RequestMapping(value="/LF08Projekt")
 public class ProjektController {
+    private final MitarbeiterMappingService mitarbeiterMappingService;
+    private final MitarbeiterApiService mitarbeiterApiService;
     private ProjektService projektService;
     private GeplanteQualifikationService geplanteQualifikationService;
     private MitarbeiterZuordnungService mitarbeiterZuordnungService;
@@ -55,12 +53,16 @@ public class ProjektController {
                              GeplanteQualifikationService geplanteQualifikationService,
                              MitarbeiterZuordnungService mitarbeiterZuordnungService,
                              ProjektMappingService projektMappingService,
-                             ValidationService validationService) {
+                             ValidationService validationService,
+                             MitarbeiterMappingService mitarbeiterMappingService,
+                             MitarbeiterApiService mitarbeiterApiService) {
         this.projektService = projektService;
         this.geplanteQualifikationService = geplanteQualifikationService;
         this.mitarbeiterZuordnungService = mitarbeiterZuordnungService;
         this.projektMappingService = projektMappingService;
         this.validationService = validationService;
+        this.mitarbeiterApiService = mitarbeiterApiService;
+        this.mitarbeiterMappingService = mitarbeiterMappingService;
     }
 
     @PostMapping(path="/Projekt")
@@ -89,8 +91,6 @@ public class ProjektController {
         ProjektCreateConfirmationDto returnDto = this.projektMappingService.mapProjektEntityToProjektCreateConfirmationDto(projektEntity);
         returnDto.setGeplanteQualifikationen(geplanteQualifikationen);
         return returnDto;
-        this.mitarbeiterService = mitarbeiterService;
-        this.mappingService = mappingService;
     }
 
     @PostMapping("{projekt_id}/mitarbeiter/{mitarbeiter_id}")
@@ -99,7 +99,7 @@ public class ProjektController {
         //JWT authentifizerung fehlt
         boolean qualifikationInProjekt = false;
         ProjektEntity projekt = this.projektService.readById(projekt_id);
-        GetMitarbeiterDto mitarbeiterDto = this.mitarbeiterService.getMitarbeiterDto(mitarbeiter_id);
+        MitarbeiterDto mitarbeiterDto = this.mitarbeiterApiService.getMitarbeiterById(mitarbeiter_id);
         List<GeplanteQualifikationEntity> geplanteQualifikationen = this.geplanteQualifikationService.readByProjektId(projekt_id);
 
         for (GeplanteQualifikationEntity geplanteQualifikation : geplanteQualifikationen) {
@@ -111,7 +111,7 @@ public class ProjektController {
         if (!qualifikationInProjekt) {
             throw new IllegalArgumentException("Die angegebene Qualifikation mit der Id " + skill.getId() + " wird nicht im projekt benötigt.");
         }
-        if (!mitarbeiterDto.getSkillset().contains(skill)) {
+        if (!mitarbeiterDto.getSkillSet().contains(skill)) {
             throw new IllegalArgumentException("Der Mitarbeiter mit der Id " + mitarbeiter_id + " besitzt die Qualifikation " + skill.getSkill() + " nicht.");
         }
         if (!this.mitarbeiterZuordnungService.isMitarbeiterAvailable(mitarbeiterDto, projekt)) {
@@ -124,15 +124,15 @@ public class ProjektController {
         mitarbeiterZuordnungDto.setProjektId(projekt_id);
         mitarbeiterZuordnungDto.setQualifikationId(skill.getId());
 
-        MitarbeiterZuordnungEntity mitarbeiterZuordnung = this.mappingService.mapMitarbeiterZuordnungDtoToMitarbeiterZuordnungEntity(mitarbeiterZuordnungDto);
+        MitarbeiterZuordnungEntity mitarbeiterZuordnung = this.mitarbeiterMappingService.mapMitarbeiterZuordnungDtoToMitarbeiterZuordnungEntity(mitarbeiterZuordnungDto);
         mitarbeiterZuordnung = this.mitarbeiterZuordnungService.create(mitarbeiterZuordnung);
 
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("ProjektId", projekt_id);
         map.put("ProjketName", projekt.getBezeichnung());
         map.put("MitarbeiterId", mitarbeiter_id);
-        map.put("MitarbeiterName", mitarbeiterDto.getFirstName() + " " + mitarbeiterDto.getLastName());
-        map.put("Qualifikation", mitarbeiterDto.getSkillset());
+        map.put("MitarbeiterName", mitarbeiterDto.getVorname() + " " + mitarbeiterDto.getNachname());
+        map.put("Qualifikation", mitarbeiterDto.getSkillSet());
 
         return new ResponseEntity<>(map, HttpStatus.OK);
     }

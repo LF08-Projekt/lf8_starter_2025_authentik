@@ -88,7 +88,7 @@ public class MitarbeiterZuordnungService {
         }
     }
 
-    public boolean isMitarbeiterAvailable(GetMitarbeiterDto mitarbeiterZuordnungDto, ProjektEntity projekt) {
+    public boolean isMitarbeiterAvailable(MitarbeiterDto mitarbeiterZuordnungDto, ProjektEntity projekt) {
         List<ProjektEntity> projekte = this.projektService.readByDate(projekt.getStartdatum(), projekt.getGeplantesEnddatum());
         for (ProjektEntity tmpProjekt: projekte) {
             if (this.projektHasMitarbeiter(tmpProjekt.getId(), mitarbeiterZuordnungDto.getId())) {
