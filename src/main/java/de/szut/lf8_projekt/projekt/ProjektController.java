@@ -1,7 +1,6 @@
 package de.szut.lf8_projekt.projekt;
 
 import de.szut.lf8_projekt.mapping.MitarbeiterMappingService;
-import de.szut.lf8_projekt.mitarbeiter.GetMitarbeiterDto;
 import de.szut.lf8_projekt.mitarbeiter.SkillDto;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationEntity;
 import de.szut.lf8_projekt.ValidationService;
@@ -43,11 +42,11 @@ import java.util.Arrays;
 public class ProjektController {
     private final MitarbeiterMappingService mitarbeiterMappingService;
     private final MitarbeiterApiService mitarbeiterApiService;
-    private ProjektService projektService;
-    private GeplanteQualifikationService geplanteQualifikationService;
-    private MitarbeiterZuordnungService mitarbeiterZuordnungService;
-    private ProjektMappingService projektMappingService;
-    private ValidationService validationService;
+    private final ProjektService projektService;
+    private final GeplanteQualifikationService geplanteQualifikationService;
+    private final MitarbeiterZuordnungService mitarbeiterZuordnungService;
+    private final ProjektMappingService projektMappingService;
+    private final ValidationService validationService;
 
     public ProjektController(ProjektService projektService,
                              GeplanteQualifikationService geplanteQualifikationService,
