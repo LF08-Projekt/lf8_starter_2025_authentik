@@ -26,4 +26,8 @@ public class GeplanteQualifikationService {
     public void delete(GeplanteQualifikationEntity entity) {
         this.repository.delete(entity);
     }
+
+    public List<GeplanteQualifikationEntity> readByProjektId(Long projektId) {
+        return this.repository.getGeplanteQualifikationEntitiesByProjektId(projektId); //TODO
+    }
 }

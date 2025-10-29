@@ -18,4 +18,6 @@ public class MitarbeiterZuordnungEntity {
     private Long projektId;
 
     private Long mitarbeiterId;
+
+    private Long qualifikationId;
 }
