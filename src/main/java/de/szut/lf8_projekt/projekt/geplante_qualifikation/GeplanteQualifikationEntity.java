@@ -17,5 +17,5 @@ public class GeplanteQualifikationEntity {
 
     private Long projektId;
 
-    private Long qualifikation;
+    private String qualifikation;
 }
