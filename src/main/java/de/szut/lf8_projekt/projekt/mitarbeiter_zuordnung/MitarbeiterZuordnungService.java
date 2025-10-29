@@ -1,8 +1,11 @@
 package de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung;
 
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class MitarbeiterZuordnungService {
     private final MitarbeiterZuordnungRepository repository;
 

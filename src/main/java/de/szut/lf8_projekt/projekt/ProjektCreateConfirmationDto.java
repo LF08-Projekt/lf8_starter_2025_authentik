@@ -1,6 +1,6 @@
 package de.szut.lf8_projekt.projekt;
 
-import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,26 +11,14 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-@Entity
-@Table(name = "projekt")
-public class ProjektEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class ProjektCreateConfirmationDto {
     private Long id;
-
     private String bezeichnung;
-
     private Long verantwortlicherId;
-
     private Long kundenId;
-
-    private String  kundeAnsprechperson;
-
+    private String kundeAnsprechperson;
     private String projektzielKommentar;
-
     private Date startdatum;
-
     private Date geplantesEnddatum;
-
-    private Date wirklichesEnddatum;
+    private List<String> geplanteQualifikationen;
 }
