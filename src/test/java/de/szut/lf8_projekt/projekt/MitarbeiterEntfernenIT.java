@@ -1,10 +1,10 @@
 package de.szut.lf8_projekt.projekt;
 
+import de.szut.lf8_projekt.Application;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterApiService;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungEntity;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterDto;
-import de.szut.lf8_starter.Lf8StarterApplication;
-import de.szut.lf8_starter.testcontainers.AbstractIntegrationTest;
+import de.szut.lf8_projekt.testcontainers.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(classes = Lf8StarterApplication.class)
+@SpringBootTest(classes = Application.class)
 public class MitarbeiterEntfernenIT extends AbstractIntegrationTest {
 
     @MockBean
@@ -48,7 +48,7 @@ public class MitarbeiterEntfernenIT extends AbstractIntegrationTest {
         MitarbeiterZuordnungEntity zuordnung = new MitarbeiterZuordnungEntity();
         zuordnung.setProjektId(projekt.getId());
         zuordnung.setMitarbeiterId(42L);
-        mitarbeiterZuordnungRepository.save(zuordnung);
+        geplanteMitarbeiterZurdnungRepository.save(zuordnung);
 
         // Mock für externe API
         MitarbeiterDto mitarbeiter = new MitarbeiterDto();
@@ -67,7 +67,7 @@ public class MitarbeiterEntfernenIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.projektBezeichnung", is("Testprojekt")));
 
         // Verifizieren dass Zuordnung gelöscht wurde
-        assertThat(mitarbeiterZuordnungRepository.findByProjektIdAndMitarbeiterId(projekt.getId(), 42L))
+        assertThat(geplanteMitarbeiterZurdnungRepository.findByProjektIdAndMitarbeiterId(projekt.getId(), 42L))
                 .isEmpty();
     }
 
