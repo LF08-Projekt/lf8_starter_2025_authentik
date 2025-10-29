@@ -43,3 +43,7 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+springBoot {
+    mainClass.set("de.szut.lf8_projekt.Application")
+}

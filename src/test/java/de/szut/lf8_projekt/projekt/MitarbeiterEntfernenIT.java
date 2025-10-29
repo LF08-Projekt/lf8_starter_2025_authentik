@@ -41,7 +41,7 @@ public class MitarbeiterEntfernenIT extends AbstractIntegrationTest {
         ProjektEntity projekt = new ProjektEntity();
         projekt.setBezeichnung("Testprojekt");
         projekt.setVerantwortlicherId(1L);
-        projekt.setKundenId("KUNDE-123");
+        projekt.setKundenId(123L);
         projekt.setStartdatum(new Date());
         projekt = projektRepository.save(projekt);
 
@@ -87,7 +87,7 @@ public class MitarbeiterEntfernenIT extends AbstractIntegrationTest {
         ProjektEntity projekt = new ProjektEntity();
         projekt.setBezeichnung("Testprojekt");
         projekt.setVerantwortlicherId(1L);
-        projekt.setKundenId("KUNDE-123");
+        projekt.setKundenId(123L);
         projekt.setStartdatum(new Date());
         projekt = projektRepository.save(projekt);
 
@@ -107,7 +107,7 @@ public class MitarbeiterEntfernenIT extends AbstractIntegrationTest {
         ProjektEntity projekt = new ProjektEntity();
         projekt.setBezeichnung("Testprojekt");
         projekt.setVerantwortlicherId(1L);
-        projekt.setKundenId("KUNDE-123");
+        projekt.setKundenId(123L);
         projekt.setStartdatum(new Date());
         projekt = projektRepository.save(projekt);
 
