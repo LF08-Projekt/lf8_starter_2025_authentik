@@ -2,6 +2,7 @@ package de.szut.lf8_projekt.projekt;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,10 +14,10 @@ public class ProjektCreateDto {
     @NotBlank(message = "Can't be empty")
     private String bezeichnung;
 
-    @NotBlank(message = "Can't be empty")
+    @NotNull(message = "Can't be null")
     private Long verantwortlicherId;
 
-    @NotBlank(message = "Can't be empty")
+    @NotNull(message = "Can't be null")
     private Long kundenId;
 
     @NotBlank(message = "Can't be empty")
@@ -25,10 +26,10 @@ public class ProjektCreateDto {
     @NotBlank(message = "Can't be empty")
     private String projektzielKommentar;
 
-    @NotBlank(message = "Can't be empty")
+    @NotNull(message = "Can't be null")
     private Date startdatum;
 
-    @NotBlank(message = "Can't be empty")
+    @NotNull(message = "Can't be null")
     private Date geplantesEnddatum;
 
     private String[] geplanteQualifikationen;
