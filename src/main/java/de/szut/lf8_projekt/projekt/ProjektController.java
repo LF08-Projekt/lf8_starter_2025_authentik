@@ -12,6 +12,8 @@ import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungEnt
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungService;
 
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterDto;
+import de.szut.lf8_projekt.projekt.dto.ProjektGetDto;
+import de.szut.lf8_projekt.projekt.dto.ProjektMitarbeiterGetDto;
 import de.szut.lf8_starter.hello.dto.HelloGetDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -179,5 +181,41 @@ public class ProjektController {
 
         MitarbeiterEntfernenResponseDto response = mitarbeiterZuordnungService.entferneMitarbeiterAusProjekt(projektId, mitarbeiterId);
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Holt alle Informationen über ein Projekt.
+     *
+     * @param id Die ID des Projekts
+     * @return Projektdetails inklusive geplanter und fehlender Qualifikationen
+     */
+    @Operation(summary = "Ruft alle Informationen über ein Projekt ab")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Projektdetails erfolgreich abgerufen"),
+        @ApiResponse(responseCode = "404", description = "Projekt nicht gefunden", content = @Content),
+        @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
+    })
+    @GetMapping(value = "/Projekt/{id}")
+    public ResponseEntity<ProjektGetDto> holeProjekt(@PathVariable Long id) {
+        ProjektGetDto projekt = projektService.holeProjektDetails(id);
+        return new ResponseEntity<>(projekt, HttpStatus.OK);
+    }
+
+    /**
+     * Holt alle Mitarbeiter eines Projekts mit ihren Qualifikationen.
+     *
+     * @param id Die ID des Projekts
+     * @return Liste aller Mitarbeiter im Projekt mit ID, Name und Qualifikationen
+     */
+    @Operation(summary = "Ruft alle Mitarbeiter eines Projekts mit ihren Qualifikationen ab")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Mitarbeiterliste erfolgreich abgerufen"),
+        @ApiResponse(responseCode = "404", description = "Projekt nicht gefunden", content = @Content),
+        @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
+    })
+    @GetMapping(value = "/Projekt/{id}/Mitarbeiter")
+    public ResponseEntity<ProjektMitarbeiterGetDto> holeProjektMitarbeiter(@PathVariable Long id) {
+        ProjektMitarbeiterGetDto mitarbeiter = projektService.holeProjektMitarbeiter(id);
+        return new ResponseEntity<>(mitarbeiter, HttpStatus.OK);
     }
 }
