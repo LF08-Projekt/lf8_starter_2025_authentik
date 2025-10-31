@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterDto;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterEntfernenResponseDto;
-import de.szut.lf8_starter.exceptionHandling.ResourceNotFoundException;
 import de.szut.lf8_projekt.exceptionHandling.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
