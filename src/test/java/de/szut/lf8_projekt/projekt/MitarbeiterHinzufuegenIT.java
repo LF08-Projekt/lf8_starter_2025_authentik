@@ -111,7 +111,6 @@ public class MitarbeiterHinzufuegenIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.qualifikation[0].skill", is("Java")))
                 .andExpect(jsonPath("$.qualifikation[0].id", is(1)));
 
-        // Verifizieren dass Zuordnung gelöscht wurde
         assertThat(geplanteMitarbeiterZurdnungRepository.findByProjektIdAndMitarbeiterId(projekt.getId(), 42L))
                 .isNotEmpty();
     }

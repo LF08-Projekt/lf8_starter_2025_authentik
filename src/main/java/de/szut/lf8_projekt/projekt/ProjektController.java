@@ -98,6 +98,13 @@ public class ProjektController {
         return returnDto;
     }
 
+    @Operation(summary = "Hinzufügen eines Mitarbeiters zu einem Projekt")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Mitarbeiter erfolgreich zu einem Projekt hinzugefügt"),
+            @ApiResponse(responseCode = "400", description = "Falsche Qualifikation, Mitarbeiter besitzt die Qualifikation nicht oder Mitarbeiter ist bereits im Zeitraum verplant", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Projekt oder Mitarbeiter nicht gefunden", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
+    })
     @PostMapping("{projekt_id}/mitarbeiter/{mitarbeiter_id}")
     public ResponseEntity<Object> addMitarbeiterToProjekt(@PathVariable final Long projekt_id, @PathVariable final Long mitarbeiter_id,
                                                                      @Valid @RequestBody final SkillDto skill) {
