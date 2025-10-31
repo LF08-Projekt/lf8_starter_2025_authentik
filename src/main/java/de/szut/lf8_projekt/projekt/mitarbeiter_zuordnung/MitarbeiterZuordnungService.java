@@ -84,7 +84,7 @@ public class MitarbeiterZuordnungService {
             return false;
         }
     }
-//TODO FIX
+
     public boolean isMitarbeiterAvailable(MitarbeiterDto mitarbeiterZuordnungDto, ProjektEntity projekt) {
         List<ProjektEntity> projekte = this.projektService.readByDate(projekt.getStartdatum(), projekt.getGeplantesEnddatum());
         for (ProjektEntity tmpProjekt: projekte) {
