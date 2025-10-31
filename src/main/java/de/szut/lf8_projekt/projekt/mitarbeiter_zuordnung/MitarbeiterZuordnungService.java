@@ -77,13 +77,14 @@ public class MitarbeiterZuordnungService {
     }
 
     public boolean projektHasMitarbeiter(Long projektId, Long mitarbeiterId) {
-        if (this.repository.findByProjektIdAndMitarbeiterId(projektId, mitarbeiterId) != null) {
+        Optional<MitarbeiterZuordnungEntity> mitarbeiterZuordnungEntity = this.repository.findByProjektIdAndMitarbeiterId(projektId, mitarbeiterId);
+        if (mitarbeiterZuordnungEntity.isPresent()) {
             return true;
         } else {
             return false;
         }
     }
-
+//TODO FIX
     public boolean isMitarbeiterAvailable(MitarbeiterDto mitarbeiterZuordnungDto, ProjektEntity projekt) {
         List<ProjektEntity> projekte = this.projektService.readByDate(projekt.getStartdatum(), projekt.getGeplantesEnddatum());
         for (ProjektEntity tmpProjekt: projekte) {

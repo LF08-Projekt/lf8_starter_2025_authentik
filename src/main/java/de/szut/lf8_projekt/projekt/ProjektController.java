@@ -95,14 +95,16 @@ public class ProjektController {
     @PostMapping("{projekt_id}/mitarbeiter/{mitarbeiter_id}")
     public ResponseEntity<Object> addMitarbeiterToProjekt(@PathVariable final Long projekt_id, @PathVariable final Long mitarbeiter_id,
                                                                      @Valid @RequestBody final SkillDto skill) {
-        //JWT authentifizerung fehlt
         boolean qualifikationInProjekt = false;
         ProjektEntity projekt = this.projektService.readById(projekt_id);
         MitarbeiterDto mitarbeiterDto = this.mitarbeiterApiService.getMitarbeiterById(mitarbeiter_id);
+        if (mitarbeiterDto == null) {
+            throw new ResourceNotFoundException("Der Mitarbeiter mit der Id " + mitarbeiter_id + " existiert nicht");
+        }
         List<GeplanteQualifikationEntity> geplanteQualifikationen = this.geplanteQualifikationService.readByProjektId(projekt_id);
 
         for (GeplanteQualifikationEntity geplanteQualifikation : geplanteQualifikationen) {
-            if (Objects.equals(geplanteQualifikation.getProjektId(), skill.getId())) {
+            if (Objects.equals(geplanteQualifikation.getQualifikationId(), skill.getId())) {
                 qualifikationInProjekt = true;
                 break;
             }
@@ -114,7 +116,7 @@ public class ProjektController {
             throw new IllegalArgumentException("Der Mitarbeiter mit der Id " + mitarbeiter_id + " besitzt die Qualifikation " + skill.getSkill() + " nicht.");
         }
         if (!this.mitarbeiterZuordnungService.isMitarbeiterAvailable(mitarbeiterDto, projekt)) {
-            throw new IllegalArgumentException("Der Mitarbeiter ist bereits im Zeitraum des Projekts bereits verplant.");
+            throw new IllegalArgumentException("Der Mitarbeiter ist bereits im Zeitraum des Projekts verplant.");
         }
 
         // Create mitarbeiterZuordnungDto
@@ -127,11 +129,11 @@ public class ProjektController {
         mitarbeiterZuordnung = this.mitarbeiterZuordnungService.create(mitarbeiterZuordnung);
 
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("ProjektId", projekt_id);
-        map.put("ProjketName", projekt.getBezeichnung());
-        map.put("MitarbeiterId", mitarbeiter_id);
-        map.put("MitarbeiterName", mitarbeiterDto.getVorname() + " " + mitarbeiterDto.getNachname());
-        map.put("Qualifikation", mitarbeiterDto.getSkillSet());
+        map.put("projektId", projekt_id);
+        map.put("projektName", projekt.getBezeichnung());
+        map.put("mitarbeiterId", mitarbeiter_id);
+        map.put("mitarbeiterName", mitarbeiterDto.getVollstaendigerName());
+        map.put("qualifikation", mitarbeiterDto.getSkillSet());
 
         return new ResponseEntity<>(map, HttpStatus.OK);
     }
