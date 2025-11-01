@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface GeplanteQualifikationRepository extends JpaRepository<GeplanteQualifikationEntity, Long> {
-    public List<GeplanteQualifikationEntity> getGeplanteQualifikationEntitiesByProjektId(Long id);
+    public List<GeplanteQualifikationEntity> getGeplanteQualifikationEntitiesByProjektId(Long projektID);
 }
