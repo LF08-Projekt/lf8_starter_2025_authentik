@@ -5,6 +5,8 @@ import de.szut.lf8_projekt.exceptionHandling.ResourceNotFoundException;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationEntity;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationService;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungService;
+import de.szut.lf8_starter.hello.dto.HelloGetDto;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -49,16 +51,27 @@ public class ProjektController {
         this.validationService = validationService;
     }
 
+    @Operation(summary = "Legt ein neues Projekt an")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Das Projekt wurde erfolgreich angelegt",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProjektCreateConfirmationDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Fehlende Pflichtangabe im DTO", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Der verantwortliche Mitarbeiter, Kunde oder" +
+                    " eine der geplanten Qualifikationen konnte nicht gefunden werden", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
+    })
     @PostMapping(path="/Projekt")
+    @ResponseStatus(HttpStatus.CREATED)
     public ProjektCreateConfirmationDto create(@RequestBody @Valid ProjektCreateDto dto, @AuthenticationPrincipal Jwt jwt) {
-        String securityTocken = jwt.getTokenValue();
-        if (!this.validationService.validateMitarbeiterId(dto.getVerantwortlicherId(), securityTocken)) {
+        String securityToken = jwt != null ? jwt.getTokenValue() : null;
+        if (!this.validationService.validateMitarbeiterId(dto.getVerantwortlicherId(), securityToken)) {
             throw new ResourceNotFoundException("Mitarbeiter mit der ID " + dto.getVerantwortlicherId() + " existiert nicht!");
         }
-        if (!this.validationService.validateKundenId(dto.getKundenId(), securityTocken)) {
+        if (!this.validationService.validateKundenId(dto.getKundenId(), securityToken)) {
             throw new ResourceNotFoundException("Kunde mit der ID + " + dto.getKundenId() + " existiert nicht!");
         }
-        if (!this.validationService.validateQualifications(Arrays.asList(dto.getGeplanteQualifikationen()), securityTocken)) {
+        if (dto.getGeplanteQualifikationen() != null && !this.validationService.validateQualifications(Arrays.asList(dto.getGeplanteQualifikationen()), securityToken)) {
             throw new ResourceNotFoundException("Liste der geplanten Qualifikationen enthält eine ungültige Qualifikation");
         }
 
@@ -66,10 +79,12 @@ public class ProjektController {
         projektEntity = this.projektService.create(projektEntity);
 
         List<String> geplanteQualifikationen = new ArrayList<>();
-        for (String qualifikation : dto.getGeplanteQualifikationen()) {
-            GeplanteQualifikationEntity geplanteQualifikationEntity = this.projektMappingService.mapDataToGeplanteQualifikationEntity(projektEntity.getId(), qualifikation);
-            geplanteQualifikationEntity = this.geplanteQualifikationService.create(geplanteQualifikationEntity);
-            geplanteQualifikationen.add(geplanteQualifikationEntity.getQualifikation());
+        if (dto.getGeplanteQualifikationen() != null) {
+            for (String qualifikation : dto.getGeplanteQualifikationen()) {
+                GeplanteQualifikationEntity geplanteQualifikationEntity = this.projektMappingService.mapDataToGeplanteQualifikationEntity(projektEntity.getId(), qualifikation);
+                geplanteQualifikationEntity = this.geplanteQualifikationService.create(geplanteQualifikationEntity);
+                geplanteQualifikationen.add(geplanteQualifikationEntity.getQualifikation());
+            }
         }
 
         ProjektCreateConfirmationDto returnDto = this.projektMappingService.mapProjektEntityToProjektCreateConfirmationDto(projektEntity);
