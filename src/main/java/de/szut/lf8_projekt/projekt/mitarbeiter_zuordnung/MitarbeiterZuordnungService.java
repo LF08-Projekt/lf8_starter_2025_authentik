@@ -2,6 +2,8 @@ package de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung;
 
 import de.szut.lf8_projekt.projekt.ProjektEntity;
 import de.szut.lf8_projekt.projekt.ProjektService;
+import org.springframework.stereotype.Service;
+
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterDto;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterEntfernenResponseDto;
 import de.szut.lf8_projekt.exceptionHandling.ResourceNotFoundException;
@@ -82,4 +84,24 @@ public class MitarbeiterZuordnungService {
             projekt.getBezeichnung()
         );
     }
+
+    public boolean projektHasMitarbeiter(Long projektId, Long mitarbeiterId) {
+        Optional<MitarbeiterZuordnungEntity> mitarbeiterZuordnungEntity = this.repository.findByProjektIdAndMitarbeiterId(projektId, mitarbeiterId);
+        if (mitarbeiterZuordnungEntity.isPresent()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isMitarbeiterAvailable(MitarbeiterDto mitarbeiterZuordnungDto, ProjektEntity projekt) {
+        List<ProjektEntity> projekte = this.projektService.readByDate(projekt.getStartdatum(), projekt.getGeplantesEnddatum());
+        for (ProjektEntity tmpProjekt: projekte) {
+            if (this.projektHasMitarbeiter(tmpProjekt.getId(), mitarbeiterZuordnungDto.getId())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }
