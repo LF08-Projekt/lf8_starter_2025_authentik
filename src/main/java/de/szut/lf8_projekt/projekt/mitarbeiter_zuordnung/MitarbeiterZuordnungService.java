@@ -9,6 +9,7 @@ import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterEntferne
 import de.szut.lf8_projekt.exceptionHandling.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +33,13 @@ public class MitarbeiterZuordnungService {
 
     public List<MitarbeiterZuordnungEntity> readAll() {
         return this.repository.findAll();
+    }
+
+    public List<MitarbeiterZuordnungEntity> getMitarbeiterZuordnungEntitiesByProjektId(Long projektId) {
+        return this.repository.getMitarbeiterZuordnungEntitiesByProjektId(projektId);
+    }
+    public List<MitarbeiterZuordnungEntity> getMitarbeiterZuordnungEntitiesByMitarbeiterId(Long mitarbeiterId) {
+        return this.repository.getMitarbeiterZuordnungEntitiesByMitarbeiterId(mitarbeiterId);
     }
 
     public MitarbeiterZuordnungEntity readById(Long id) {
