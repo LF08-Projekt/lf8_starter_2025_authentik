@@ -9,6 +9,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,9 +33,9 @@ public class ProjektUpdatenIT extends AbstractIntegrationTest {
         entity.setKundenId(4L);
         entity.setKundeAnsprechperson("Mike Herrmann");
         entity.setProjektzielKommentar("Geld");
-        entity.setStartdatum(new Date("2024-10-15T00:00:00Z"));
-        entity.setGeplantesEnddatum(new Date("2025-01-31T23:59:59Z"));
-        entity.setWirklichesEnddatum(new Date("2025-02-15T23:59:59Z"));
+        entity.setStartdatum(LocalDateTime.parse("2024-10-15T00:00:00Z"));
+        entity.setGeplantesEnddatum(LocalDateTime.parse("2025-01-31T23:59:59Z"));
+        entity.setWirklichesEnddatum(LocalDateTime.parse("2025-02-15T23:59:59Z"));
 
         final String content = """
                 {
@@ -71,9 +72,9 @@ public class ProjektUpdatenIT extends AbstractIntegrationTest {
         entity.setKundenId(4L);
         entity.setKundeAnsprechperson("Mike Herrmann");
         entity.setProjektzielKommentar("Geld");
-        entity.setStartdatum(new Date("2024-10-15T00:00:00Z"));
-        entity.setGeplantesEnddatum(new Date("2025-01-31T23:59:59Z"));
-        entity.setWirklichesEnddatum(new Date("2025-02-15T23:59:59Z"));
+        entity.setStartdatum(LocalDateTime.parse("2024-10-15T00:00:00Z"));
+        entity.setGeplantesEnddatum(LocalDateTime.parse("2025-01-31T23:59:59Z"));
+        entity.setWirklichesEnddatum(LocalDateTime.parse("2025-02-15T23:59:59Z"));
 
         final String content = """
                 {
