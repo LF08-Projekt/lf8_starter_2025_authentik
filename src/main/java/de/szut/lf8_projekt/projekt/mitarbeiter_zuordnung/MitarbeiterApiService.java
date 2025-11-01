@@ -10,8 +10,8 @@ public class MitarbeiterApiService {
     private final RestTemplate restTemplate;
     private static final String EMPLOYEE_API_URL = "https://employee-api.szut.dev/employees";
 
-    public MitarbeiterApiService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public MitarbeiterApiService() {
+        this.restTemplate = new RestTemplate();
     }
 
     public MitarbeiterDto getMitarbeiterById(Long mitarbeiterId) {
