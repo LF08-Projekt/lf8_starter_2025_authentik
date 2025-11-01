@@ -13,6 +13,7 @@ import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungSer
 
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterDto;
 import de.szut.lf8_projekt.projekt.dto.ProjektGetDto;
+import de.szut.lf8_projekt.projekt.dto.ProjektLoeschenResponseDto;
 import de.szut.lf8_projekt.projekt.dto.ProjektMitarbeiterGetDto;
 import de.szut.lf8_starter.hello.dto.HelloGetDto;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -217,5 +218,23 @@ public class ProjektController {
     public ResponseEntity<ProjektMitarbeiterGetDto> holeProjektMitarbeiter(@PathVariable Long id) {
         ProjektMitarbeiterGetDto mitarbeiter = projektService.holeProjektMitarbeiter(id);
         return new ResponseEntity<>(mitarbeiter, HttpStatus.OK);
+    }
+
+    /**
+     * Löscht ein Projekt anhand der Projekt-ID.
+     *
+     * @param id Die ID des zu löschenden Projekts
+     * @return Alle Projektinformationen des gelöschten Projekts
+     */
+    @Operation(summary = "Löscht ein Projekt")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Projekt erfolgreich gelöscht"),
+        @ApiResponse(responseCode = "404", description = "Projekt nicht gefunden", content = @Content),
+        @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
+    })
+    @DeleteMapping(value = "/Projekt/{id}")
+    public ResponseEntity<ProjektLoeschenResponseDto> loescheProjekt(@PathVariable Long id) {
+        ProjektLoeschenResponseDto response = projektService.loescheProjekt(id);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
