@@ -5,6 +5,8 @@ import de.szut.lf8_projekt.exceptionHandling.ResourceNotFoundException;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationEntity;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationService;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungService;
+import de.szut.lf8_starter.hello.dto.HelloGetDto;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -46,7 +48,18 @@ public class ProjektController {
         this.validationService = validationService;
     }
 
+    @Operation(summary = "Legt ein neues Projekt an")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Das Projekt wurde erfolgreich angelegt",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProjektCreateConfirmationDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Fehlende Pflichtangabe im DTO", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Der verantwortliche Mitarbeiter, Kunde oder" +
+                    " eine der geplanten Qualifikationen konnte nicht gefunden werden", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
+    })
     @PostMapping(path="/Projekt")
+    @ResponseStatus(HttpStatus.CREATED)
     public ProjektCreateConfirmationDto create(@RequestBody @Valid ProjektCreateDto dto, @AuthenticationPrincipal Jwt jwt) {
         String securityToken = jwt != null ? jwt.getTokenValue() : null;
         if (!this.validationService.validateMitarbeiterId(dto.getVerantwortlicherId(), securityToken)) {
