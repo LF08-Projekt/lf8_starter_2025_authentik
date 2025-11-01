@@ -12,7 +12,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -232,8 +231,8 @@ public class PostIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("kundenId", is(1)))
                 .andExpect(jsonPath("kundeAnsprechperson", is("Sabine Bauer")))
                 .andExpect(jsonPath("projektzielKommentar", is("Pilot im Vertrieb Q4, Rollout Q1")))
-                .andExpect(jsonPath("startdatum", is("2025-10-15T00:00:00.000+00:00")))
-                .andExpect(jsonPath("geplantesEnddatum", is("2026-01-31T23:59:59.000+00:00")))
+                .andExpect(jsonPath("startdatum", is("2025-10-15T00:00:00")))
+                .andExpect(jsonPath("geplantesEnddatum", is("2026-01-31T23:59:59")))
                 .andExpect(jsonPath("geplanteQualifikationen", hasItems("CRM-Administration", "Datenschutz-Grundlagen", "Vertriebsschulung")))
                 .andReturn()
                 .getResponse()

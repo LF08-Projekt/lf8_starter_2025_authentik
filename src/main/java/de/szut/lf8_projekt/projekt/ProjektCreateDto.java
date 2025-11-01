@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -35,11 +35,11 @@ public class ProjektCreateDto {
 
     @NotNull(message = "Can't be null")
     @Schema(description = "Startdatum (ISO-8601)", example = "2025-10-15T00:00:00Z")
-    private Date startdatum;
+    private LocalDateTime startdatum;
 
     @NotNull(message = "Can't be null")
     @Schema(description = "Geplantes Enddatum (ISO-8601)", example = "2026-01-31T23:59:59Z")
-    private Date geplantesEnddatum;
+    private LocalDateTime geplantesEnddatum;
 
     @Schema(description = "Liste der für das Projekt geplanten Qualifikationen", example = "[\"Java\",\"Angular\"]")
     private String[] geplanteQualifikationen;

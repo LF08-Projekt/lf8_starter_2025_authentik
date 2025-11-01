@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -42,7 +42,7 @@ public class MitarbeiterEntfernenIT extends AbstractIntegrationTest {
         projekt.setBezeichnung("Testprojekt");
         projekt.setVerantwortlicherId(1L);
         projekt.setKundenId(123L);
-        projekt.setStartdatum(new Date());
+        projekt.setStartdatum(LocalDateTime.now());
         projekt = projektRepository.save(projekt);
 
         MitarbeiterZuordnungEntity zuordnung = new MitarbeiterZuordnungEntity();
@@ -88,7 +88,7 @@ public class MitarbeiterEntfernenIT extends AbstractIntegrationTest {
         projekt.setBezeichnung("Testprojekt");
         projekt.setVerantwortlicherId(1L);
         projekt.setKundenId(123L);
-        projekt.setStartdatum(new Date());
+        projekt.setStartdatum(LocalDateTime.now());
         projekt = projektRepository.save(projekt);
 
         // Mock: Mitarbeiter existiert nicht
@@ -108,7 +108,7 @@ public class MitarbeiterEntfernenIT extends AbstractIntegrationTest {
         projekt.setBezeichnung("Testprojekt");
         projekt.setVerantwortlicherId(1L);
         projekt.setKundenId(123L);
-        projekt.setStartdatum(new Date());
+        projekt.setStartdatum(LocalDateTime.now());
         projekt = projektRepository.save(projekt);
 
         // Mock: Mitarbeiter existiert

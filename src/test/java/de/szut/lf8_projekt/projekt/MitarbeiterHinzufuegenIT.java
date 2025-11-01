@@ -16,9 +16,9 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,8 +43,8 @@ public class MitarbeiterHinzufuegenIT extends AbstractIntegrationTest {
         projekt.setBezeichnung("Testprojekt");
         projekt.setVerantwortlicherId(1L);
         projekt.setKundenId(123L);
-        projekt.setStartdatum(new Date());
-        projekt.setGeplantesEnddatum(new Date(2026, Calendar.DECEMBER,23));
+        projekt.setStartdatum(LocalDateTime.now());
+        projekt.setGeplantesEnddatum(LocalDateTime.of(2026, 12, 23, 0, 0));
         projekt = projektRepository.save(projekt);
         GeplanteQualifikationEntity geplanteQualifikation = new GeplanteQualifikationEntity();
         geplanteQualifikation.setQualifikationId(1L);

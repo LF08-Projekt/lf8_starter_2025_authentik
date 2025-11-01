@@ -3,7 +3,7 @@ package de.szut.lf8_projekt.projekt;
 import de.szut.lf8_projekt.exceptionHandling.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,7 +35,7 @@ public class ProjektService {
         this.repository.delete(entity);
     }
 
-    public List<ProjektEntity> readByDate(Date startdatum, Date endDatum) {
+    public List<ProjektEntity> readByDate(LocalDateTime startdatum, LocalDateTime endDatum) {
         return this.repository.findAllByStartdatumIsBetweenOrGeplantesEnddatumIsBetween(startdatum, endDatum, startdatum, endDatum);
     }
 }
