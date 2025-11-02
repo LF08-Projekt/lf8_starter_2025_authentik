@@ -13,9 +13,11 @@ import java.util.Optional;
 @Service
 public class ProjektService {
     private final ProjektRepository repository;
+    private final ProjektMappingService projektMappingService;
 
-    public ProjektService(ProjektRepository repository) {
+    public ProjektService(ProjektRepository repository, ProjektMappingService projektMappingService) {
         this.repository = repository;
+        this.projektMappingService = projektMappingService;
     }
 
     public ProjektEntity create(ProjektEntity entity) {
@@ -42,12 +44,13 @@ public class ProjektService {
         return this.repository.findAllByStartdatumIsBetweenOrGeplantesEnddatumIsBetween(startdatum, endDatum, startdatum, endDatum);
     }
 
-    public List<ProjektEntity> readByMitarbeiterId(List<MitarbeiterZuordnungEntity> mitarbeiterZuordnungen) {
-        List<ProjektEntity> projekts = new ArrayList<>();
+    public List<ProjektByMitarbeiterDto> readByMitarbeiterId(List<MitarbeiterZuordnungEntity> mitarbeiterZuordnungen) {
+        List<ProjektByMitarbeiterDto> projekts = new ArrayList<>();
         for(MitarbeiterZuordnungEntity mitarbeiterZuordnung: mitarbeiterZuordnungen) {
             Optional<ProjektEntity> projekt = this.repository.findById(mitarbeiterZuordnung.getProjektId());
             if (projekt.isPresent()) {
-                projekts.add(projekt.get());
+                ProjektByMitarbeiterDto projektByMitarbeiterDto = this.projektMappingService.mapProjektEntityToProjektByMitarbeiterDto(projekt.get());
+                projekts.add(projektByMitarbeiterDto);
             }
         }
         return projekts;

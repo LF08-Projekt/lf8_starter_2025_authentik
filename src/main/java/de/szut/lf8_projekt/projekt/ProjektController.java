@@ -169,13 +169,12 @@ public class ProjektController {
     @Operation(summary = "Projekte anhand eines Mitarbeiters finden")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Projekte werden erfolgreich zurück gegeben"),
-            @ApiResponse(responseCode = "404", description = "Mitarbeiter nicht gefunden", content = @Content),
             @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
     })
-    @RequestMapping("/Mitarbeiter/{id}/Projekt")
+    @RequestMapping("/Mitarbeiter/{mitarbeiterId}/Projekt")
     public ResponseEntity<Object> ReadProjektsByMitarbeiterId(@PathVariable final Long mitarbeiterId) {
         List<MitarbeiterZuordnungEntity> mitarbeiterZuordnungen = this.mitarbeiterZuordnungService.getAllProjektsFromMitarbeiter(mitarbeiterId);
-        List<ProjektEntity> projekts = this.projektService.readByMitarbeiterId(mitarbeiterZuordnungen);
+        List<ProjektByMitarbeiterDto> projekts = this.projektService.readByMitarbeiterId(mitarbeiterZuordnungen);
         return new ResponseEntity<>(projekts, HttpStatus.OK);
     }
 
