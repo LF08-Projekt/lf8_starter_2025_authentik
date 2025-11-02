@@ -14,6 +14,12 @@ public class MitarbeiterApiService {
         this.restTemplate = new RestTemplate();
     }
 
+    /**
+     * Ruft Mitarbeiterdaten von der externen Employee API ab.
+     *
+     * @param mitarbeiterId Die ID des Mitarbeiters
+     * @return Ein MitarbeiterDto mit den Mitarbeiterdaten oder null wenn der Mitarbeiter nicht gefunden wurde
+     */
     public MitarbeiterDto getMitarbeiterById(Long mitarbeiterId) {
         try {
             String url = EMPLOYEE_API_URL + "/" + mitarbeiterId;
