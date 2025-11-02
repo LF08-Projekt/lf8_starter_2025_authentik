@@ -43,6 +43,19 @@ public class MitarbeiterZuordnungService {
         this.repository.delete(entity);
     }
 
+    /**
+     * Entfernt einen Mitarbeiter aus einem Projekt.
+     * Validiert zunächst die Existenz von Projekt und Mitarbeiter,
+     * prüft ob eine Zuordnung besteht und löscht diese dann aus der Datenbank.
+     *
+     * @param projektId Die ID des Projekts, aus dem der Mitarbeiter entfernt werden soll
+     * @param mitarbeiterId Die ID des Mitarbeiters, der entfernt werden soll
+     * @return Ein DTO mit den Informationen zum entfernten Mitarbeiter und Projekt
+     * @throws IllegalArgumentException wenn projektId oder mitarbeiterId null oder <= 0 ist
+     * @throws ResourceNotFoundException wenn das Projekt nicht existiert
+     * @throws ResourceNotFoundException wenn der Mitarbeiter nicht existiert
+     * @throws ResourceNotFoundException wenn der Mitarbeiter nicht in dem Projekt arbeitet
+     */
     public MitarbeiterEntfernenResponseDto entferneMitarbeiterAusProjekt(Long projektId, Long mitarbeiterId) {
         // Validiere IDs
         if (projektId == null || projektId <= 0) {
@@ -85,6 +98,13 @@ public class MitarbeiterZuordnungService {
         );
     }
 
+    /**
+     * Prüft ob ein Mitarbeiter einem bestimmten Projekt zugeordnet ist.
+     *
+     * @param projektId Die ID des Projekts
+     * @param mitarbeiterId Die ID des Mitarbeiters
+     * @return true wenn der Mitarbeiter dem Projekt zugeordnet ist, sonst false
+     */
     public boolean projektHasMitarbeiter(Long projektId, Long mitarbeiterId) {
         Optional<MitarbeiterZuordnungEntity> mitarbeiterZuordnungEntity = this.repository.findByProjektIdAndMitarbeiterId(projektId, mitarbeiterId);
         if (mitarbeiterZuordnungEntity.isPresent()) {
@@ -94,6 +114,15 @@ public class MitarbeiterZuordnungService {
         }
     }
 
+    /**
+     * Prüft ob ein Mitarbeiter für ein Projekt verfügbar ist.
+     * Ein Mitarbeiter ist nicht verfügbar wenn er bereits in einem Projekt arbeitet,
+     * dessen Zeitraum sich mit dem neuen Projekt überschneidet.
+     *
+     * @param mitarbeiterZuordnungDto Der Mitarbeiter dessen Verfügbarkeit geprüft werden soll
+     * @param projekt Das Projekt für das die Verfügbarkeit geprüft werden soll
+     * @return true wenn der Mitarbeiter verfügbar ist, false wenn er bereits in einem überschneidenden Projekt arbeitet
+     */
     public boolean isMitarbeiterAvailable(MitarbeiterDto mitarbeiterZuordnungDto, ProjektEntity projekt) {
         List<ProjektEntity> projekte = this.projektService.readByDate(projekt.getStartdatum(), projekt.getGeplantesEnddatum());
         for (ProjektEntity tmpProjekt: projekte) {
