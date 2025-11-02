@@ -35,12 +35,12 @@ public class ProjektMappingService {
         return dto;
     }
 
-    public ProjektByMitarbeiterDto mapProjektEntityToProjektByMitarbeiterDto(ProjektEntity projektEntity) {
-        ProjektByMitarbeiterDto projektByMitarbeiterDto = new ProjektByMitarbeiterDto();
-        projektByMitarbeiterDto.setBezeichnung(projektEntity.getBezeichnung());
-        projektByMitarbeiterDto.setId(projektEntity.getId());
-        projektByMitarbeiterDto.setKundenId(projektEntity.getKundenId());
-        projektByMitarbeiterDto.setVerantwortlicherId(projektEntity.getVerantwortlicherId());
-        return projektByMitarbeiterDto;
+    public ProjektCompactDto mapProjektEntityToProjektByMitarbeiterDto(ProjektEntity projektEntity) {
+        ProjektCompactDto projektCompactDto = new ProjektCompactDto();
+        projektCompactDto.setBezeichnung(projektEntity.getBezeichnung());
+        projektCompactDto.setId(projektEntity.getId());
+        projektCompactDto.setKundenId(projektEntity.getKundenId());
+        projektCompactDto.setVerantwortlicherId(projektEntity.getVerantwortlicherId());
+        return projektCompactDto;
     }
 }

@@ -4,13 +4,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
-import java.util.List;
-
 @NoArgsConstructor
 @Getter
 @Setter
-public class ProjektByMitarbeiterDto {
+public class ProjektCompactDto {
     private Long id;
     private String bezeichnung;
     private Long verantwortlicherId;

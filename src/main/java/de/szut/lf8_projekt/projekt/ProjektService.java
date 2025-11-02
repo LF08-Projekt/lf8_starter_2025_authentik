@@ -2,7 +2,6 @@ package de.szut.lf8_projekt.projekt;
 
 import de.szut.lf8_projekt.exceptionHandling.ResourceNotFoundException;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungEntity;
-import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -44,13 +43,13 @@ public class ProjektService {
         return this.repository.findAllByStartdatumIsBetweenOrGeplantesEnddatumIsBetween(startdatum, endDatum, startdatum, endDatum);
     }
 
-    public List<ProjektByMitarbeiterDto> readByMitarbeiterId(List<MitarbeiterZuordnungEntity> mitarbeiterZuordnungen) {
-        List<ProjektByMitarbeiterDto> projekts = new ArrayList<>();
+    public List<ProjektCompactDto> readByMitarbeiterId(List<MitarbeiterZuordnungEntity> mitarbeiterZuordnungen) {
+        List<ProjektCompactDto> projekts = new ArrayList<>();
         for(MitarbeiterZuordnungEntity mitarbeiterZuordnung: mitarbeiterZuordnungen) {
             Optional<ProjektEntity> projekt = this.repository.findById(mitarbeiterZuordnung.getProjektId());
             if (projekt.isPresent()) {
-                ProjektByMitarbeiterDto projektByMitarbeiterDto = this.projektMappingService.mapProjektEntityToProjektByMitarbeiterDto(projekt.get());
-                projekts.add(projektByMitarbeiterDto);
+                ProjektCompactDto projektCompactDto = this.projektMappingService.mapProjektEntityToProjektByMitarbeiterDto(projekt.get());
+                projekts.add(projektCompactDto);
             }
         }
         return projekts;
