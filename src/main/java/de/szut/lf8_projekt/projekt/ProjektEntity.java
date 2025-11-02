@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @NoArgsConstructor
@@ -28,9 +28,9 @@ public class ProjektEntity {
 
     private String projektzielKommentar;
 
-    private Date startdatum;
+    private LocalDateTime startdatum;
 
-    private Date geplantesEnddatum;
+    private LocalDateTime geplantesEnddatum;
 
-    private Date wirklichesEnddatum;
+    private LocalDateTime wirklichesEnddatum;
 }

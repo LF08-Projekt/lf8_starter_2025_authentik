@@ -11,7 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.web.client.RestClientException;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
@@ -64,7 +64,7 @@ public class MitarbeiterEntfernenSecurityIT extends AbstractIntegrationTest {
         projekt.setBezeichnung("Testprojekt");
         projekt.setVerantwortlicherId(1L);
         projekt.setKundenId(123L);
-        projekt.setStartdatum(new Date());
+        projekt.setStartdatum(LocalDateTime.now());
         projekt = projektRepository.save(projekt);
 
         MitarbeiterZuordnungEntity zuordnung = new MitarbeiterZuordnungEntity();
@@ -90,7 +90,7 @@ public class MitarbeiterEntfernenSecurityIT extends AbstractIntegrationTest {
         projekt.setBezeichnung("Testprojekt");
         projekt.setVerantwortlicherId(1L);
         projekt.setKundenId(123L);
-        projekt.setStartdatum(new Date());
+        projekt.setStartdatum(LocalDateTime.now());
         projekt = projektRepository.save(projekt);
 
         MitarbeiterZuordnungEntity zuordnung = new MitarbeiterZuordnungEntity();
@@ -115,7 +115,7 @@ public class MitarbeiterEntfernenSecurityIT extends AbstractIntegrationTest {
         projekt.setBezeichnung("Testprojekt");
         projekt.setVerantwortlicherId(1L);
         projekt.setKundenId(123L);
-        projekt.setStartdatum(new Date());
+        projekt.setStartdatum(LocalDateTime.now());
         projekt = projektRepository.save(projekt);
 
         MitarbeiterZuordnungEntity zuordnung = new MitarbeiterZuordnungEntity();

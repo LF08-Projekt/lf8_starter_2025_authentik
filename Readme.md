@@ -54,3 +54,7 @@ Um einen JWT Token zu generieren, der für die Authentifizierung benötigt wird,
 1. Auf der Projektebene [GetBearerToken.http](GetBearerToken.http) öffnen.
 2. Neben der Request auf den grünen Pfeil drücken
 3. Aus dem Reponse das access_token kopieren
+
+# Projekt Anlegen
+- Bei fehlenden Feldern kriege ich bei Postman keinen 400-Anwort, sondern das Feld wird einfach als null angelegt. 
+    Bei den Unittests wird jedoch wie erwartet eine 400-Antwort gesendet. Ich weiß nicht, woran das liegt.
