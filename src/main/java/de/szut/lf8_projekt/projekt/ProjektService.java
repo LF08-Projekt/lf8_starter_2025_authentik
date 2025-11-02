@@ -3,6 +3,7 @@ package de.szut.lf8_projekt.projekt;
 import de.szut.lf8_projekt.exceptionHandling.ResourceNotFoundException;
 import de.szut.lf8_projekt.projekt.dto.MitarbeiterImProjektDto;
 import de.szut.lf8_projekt.projekt.dto.ProjektGetDto;
+import de.szut.lf8_projekt.projekt.dto.ProjektLoeschenResponseDto;
 import de.szut.lf8_projekt.projekt.dto.ProjektMitarbeiterGetDto;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationEntity;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationRepository;
@@ -155,5 +156,42 @@ public class ProjektService {
         return geplanteQualifikationen.stream()
                 .filter(geplant -> !vorhandeneQualifikationen.contains(geplant))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Löscht ein Projekt und gibt alle Projektinformationen zurück.
+     * Sammelt vor dem Löschen alle Projektdaten inklusive zugeordneter Mitarbeiter
+     * und benötigter Qualifikationen.
+     *
+     * @param projektId Die ID des zu löschenden Projekts
+     * @return Ein DTO mit allen Informationen des gelöschten Projekts
+     * @throws ResourceNotFoundException wenn das Projekt nicht existiert
+     */
+    public ProjektLoeschenResponseDto loescheProjekt(Long projektId) {
+        ProjektEntity projekt = readById(projektId);
+
+        List<GeplanteQualifikationEntity> geplant = geplanteQualifikationRepository.getGeplanteQualifikationEntitiesByProjektId(projektId);
+        List<String> benoetigteQualifikationen = geplant.stream()
+                .map(GeplanteQualifikationEntity::getQualifikation)
+                .collect(Collectors.toList());
+
+        ProjektMitarbeiterGetDto mitarbeiterDto = holeProjektMitarbeiter(projektId);
+
+        ProjektLoeschenResponseDto responseDto = new ProjektLoeschenResponseDto();
+        responseDto.setProjektId(projekt.getId());
+        responseDto.setBezeichnung(projekt.getBezeichnung());
+        responseDto.setVerantwortlicherMitarbeiterId(projekt.getVerantwortlicherId());
+        responseDto.setKundenId(projekt.getKundenId());
+        responseDto.setKundenAnsprechpartnerName(projekt.getKundeAnsprechperson());
+        responseDto.setKommentar(projekt.getProjektzielKommentar());
+        responseDto.setStartdatum(projekt.getStartdatum());
+        responseDto.setGeplantesEnddatum(projekt.getGeplantesEnddatum());
+        responseDto.setTatsaechlichesEnddatum(projekt.getWirklichesEnddatum());
+        responseDto.setMitarbeiter(mitarbeiterDto.getMitarbeiter());
+        responseDto.setBenoetigteQualifikationen(benoetigteQualifikationen);
+
+        delete(projekt);
+
+        return responseDto;
     }
 }
