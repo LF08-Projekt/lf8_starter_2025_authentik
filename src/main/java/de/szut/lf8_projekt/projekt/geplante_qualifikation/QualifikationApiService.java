@@ -6,11 +6,13 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.sql.Array;
 import java.util.Arrays;
 
+@Service
 public class QualifikationApiService {
     private final RestTemplate restTemplate;
     private static final String QUALIFICATION_API_URL = "https://employee-api.szut.dev/qualifications";

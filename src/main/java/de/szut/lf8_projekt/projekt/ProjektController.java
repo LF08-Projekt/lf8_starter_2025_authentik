@@ -6,6 +6,7 @@ import de.szut.lf8_projekt.mitarbeiter.SkillDto;
 import de.szut.lf8_projekt.ValidationService;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationEntity;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationService;
+import de.szut.lf8_projekt.projekt.geplante_qualifikation.QualifikationApiService;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterApiService;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungDto;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungEntity;
@@ -61,6 +62,7 @@ public class ProjektController {
     private final MitarbeiterZuordnungService mitarbeiterZuordnungService;
     private final ProjektMappingService projektMappingService;
     private final ValidationService validationService;
+    private final QualifikationApiService qualifikationApiService;
 
     /**
      * Konstruktor für den ProjektController.
@@ -72,6 +74,7 @@ public class ProjektController {
      * @param validationService Service für Validierungen
      * @param mitarbeiterMappingService Service für Mitarbeiter-Mappings
      * @param mitarbeiterApiService Service für externe Mitarbeiter-API-Aufrufe
+     * @param qualifikationApiService Service für externe Qualifikations-API-Aufrufe
      */
     public ProjektController(ProjektService projektService,
                              GeplanteQualifikationService geplanteQualifikationService,
@@ -79,7 +82,8 @@ public class ProjektController {
                              ProjektMappingService projektMappingService,
                              ValidationService validationService,
                              MitarbeiterMappingService mitarbeiterMappingService,
-                             MitarbeiterApiService mitarbeiterApiService) {
+                             MitarbeiterApiService mitarbeiterApiService,
+                             QualifikationApiService qualifikationApiService) {
         this.projektService = projektService;
         this.geplanteQualifikationService = geplanteQualifikationService;
         this.mitarbeiterZuordnungService = mitarbeiterZuordnungService;
@@ -87,6 +91,7 @@ public class ProjektController {
         this.validationService = validationService;
         this.mitarbeiterApiService = mitarbeiterApiService;
         this.mitarbeiterMappingService = mitarbeiterMappingService;
+        this.qualifikationApiService = qualifikationApiService;
     }
 
     /**
