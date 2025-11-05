@@ -79,14 +79,15 @@ public class ProjektUpdatenIT extends AbstractIntegrationTest {
 
     @Test
     @WithMockUser
-    public void ProjektExisitertNicht() throws Exception {
+    public void ProjektExistiertNicht() throws Exception {
         final String content = this.setUpDefaultContent();
 
         final var contentAsString = this.mockMvc.perform(put("/LF08Projekt/Projekt/99")
                         .content(content)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message", is("Projekt mit der ID 99 existiert nicht")));
     }
 
     @Test
@@ -103,7 +104,8 @@ public class ProjektUpdatenIT extends AbstractIntegrationTest {
                         .content(content)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message", is("Mitarbeiter mit der ID 2 existiert nicht!")));
     }
 
     @Test
@@ -121,7 +123,8 @@ public class ProjektUpdatenIT extends AbstractIntegrationTest {
                         .content(content)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message", is("Kunde mit der ID 1 existiert nicht!")));
     }
 
     @Test
@@ -139,7 +142,78 @@ public class ProjektUpdatenIT extends AbstractIntegrationTest {
                         .content(content)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message", is("Liste der geplanten Qualifikationen enthält eine ungültige Qualifikation")));
+    }
+
+    @Test
+    @WithMockUser
+    public void verschobenesGeplantesEnddatumvorStartdatum() throws Exception {
+        ProjektEntity entity = this.setUpDefaultProjekt();
+        final String content = """
+                {
+                    "bezeichnung": "Einführung CRM-System",
+                    "verantwortlicherId": 2,
+                    "kundenId": 1,
+                    "kundeAnsprechperson": "Sabine Bauer",
+                    "projektzielKommentar": "Pilot im Vertrieb Q4, Rollout Q1",
+                    "startdatum": "2024-11-15T00:00:00",
+                    "geplantesEnddatum": "2015-03-15T23:59:59",
+                    "wirklichesEnddatum": "2025-03-16T23:59:59",
+                    "geplanteQualifikationen": [
+                        "CRM-Administration",
+                        "Datenschutz-Grundlagen",
+                        "Vertriebsschulung"
+                        ]
+                }
+                """;
+
+        when(validationService.validateMitarbeiterId(any(Long.class), nullable(String.class))).thenReturn(true);
+        when(validationService.validateKundenId(any(Long.class), nullable(String.class))).thenReturn(true);
+        when(validationService.validateQualifications(any(), nullable(String.class))).thenReturn(true);
+
+        this.projektRepository.save(entity);
+        final var contentAsString = this.mockMvc.perform(put("/LF08Projekt/Projekt/" + entity.getId())
+                        .content(content)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
+                .andExpect(status().isTooEarly())
+                .andExpect(jsonPath("$.message", is("Das geplante Ende des Projekts kann nicht vor dem Start des Projekts liegen")));
+    }
+
+    @Test
+    @WithMockUser
+    public void verschobenesWirklichesEnddatumvorStartdatum() throws Exception {
+        ProjektEntity entity = this.setUpDefaultProjekt();
+        final String content = """
+                {
+                    "bezeichnung": "Einführung CRM-System",
+                    "verantwortlicherId": 2,
+                    "kundenId": 1,
+                    "kundeAnsprechperson": "Sabine Bauer",
+                    "projektzielKommentar": "Pilot im Vertrieb Q4, Rollout Q1",
+                    "startdatum": "2024-11-15T00:00:00",
+                    "geplantesEnddatum": "2025-03-15T23:59:59",
+                    "wirklichesEnddatum": "2015-03-16T23:59:59",
+                    "geplanteQualifikationen": [
+                        "CRM-Administration",
+                        "Datenschutz-Grundlagen",
+                        "Vertriebsschulung"
+                        ]
+                }
+                """;
+
+        when(validationService.validateMitarbeiterId(any(Long.class), nullable(String.class))).thenReturn(true);
+        when(validationService.validateKundenId(any(Long.class), nullable(String.class))).thenReturn(true);
+        when(validationService.validateQualifications(any(), nullable(String.class))).thenReturn(true);
+
+        this.projektRepository.save(entity);
+        final var contentAsString = this.mockMvc.perform(put("/LF08Projekt/Projekt/" + entity.getId())
+                        .content(content)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
+                .andExpect(status().isTooEarly())
+                .andExpect(jsonPath("$.message", is("Das wirkliche Ende des Projekts kann nicht vor dem Start des Projekts liegen")));
     }
 
     public void verschobenesEnddatumUngültig() throws Exception {
@@ -178,7 +252,10 @@ public class ProjektUpdatenIT extends AbstractIntegrationTest {
                         .content(content)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
-                .andExpect(status().isConflict());
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message", is("Mitarbeiter 42 ist" +
+                        " zu diesem Zeit bereits in Projekt " + entity2.getId() +
+                        " Bitte klären sie diesen Konflikt")));
     }
 
     @Test

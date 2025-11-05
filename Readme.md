@@ -55,6 +55,12 @@ Um einen JWT Token zu generieren, der für die Authentifizierung benötigt wird,
 2. Neben der Request auf den grünen Pfeil drücken
 3. Aus dem Reponse das access_token kopieren
 
-# Projekt Anlegen
+# Projekt anlegen
 - Bei fehlenden Feldern kriege ich bei Postman keinen 400-Anwort, sondern das Feld wird einfach als null angelegt. 
     Bei den Unittests wird jedoch wie erwartet eine 400-Antwort gesendet. Ich weiß nicht, woran das liegt.
+
+# Projekt bearbeiten
++ Wenn das geplante Enddatum eines Projekts 
+
+# Projekt nach Id abrufen
++ Die noch fehlenden Qualifikationen werden mit ausgegeben (weil noch kein Mitarbeiter mit den entsprechenden Qualifikationen hinzugefügt wurde)
