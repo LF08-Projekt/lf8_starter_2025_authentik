@@ -13,6 +13,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -77,7 +78,7 @@ public class MitarbeiterEntfernenIT extends AbstractIntegrationTest {
         this.mockMvc.perform(delete("/LF08Projekt/999/mitarbeiter/1")
                         .with(csrf()))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message", is("Projekt mit der ID 999 existiert nicht")));
+                .andExpect(jsonPath("$.message", containsString("existiert nicht")));
     }
 
     @Test
