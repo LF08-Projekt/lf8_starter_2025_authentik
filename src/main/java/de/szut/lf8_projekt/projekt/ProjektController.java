@@ -138,10 +138,19 @@ public class ProjektController {
 
         List<String> geplanteQualifikationen = new ArrayList<>();
         if (dto.getGeplanteQualifikationen() != null) {
+            SkillDto[] allQualifikations = this.qualifikationApiService.getAllQualifikations(securityToken);
+
             for (String qualifikation : dto.getGeplanteQualifikationen()) {
-                GeplanteQualifikationEntity geplanteQualifikationEntity = this.projektMappingService.mapDataToGeplanteQualifikationEntity(projektEntity.getId(), qualifikation);
+                SkillDto matchingQualifikation = Arrays.stream(allQualifikations)
+                        .filter(x -> qualifikation.equals(x.getSkill())).findFirst().orElse(null);
+                if (matchingQualifikation == null) {
+                    throw new ResourceNotFoundException("Liste der geplanten Qualifikationen enthält eine ungültige Qualifikation");
+                }
+
+                GeplanteQualifikationEntity geplanteQualifikationEntity =
+                        this.projektMappingService.mapDataToGeplanteQualifikationEntity(projektEntity.getId(), matchingQualifikation.getId());
                 geplanteQualifikationEntity = this.geplanteQualifikationService.create(geplanteQualifikationEntity);
-                geplanteQualifikationen.add(geplanteQualifikationEntity.getQualifikation());
+                geplanteQualifikationen.add(qualifikation);
             }
         }
 
@@ -294,17 +303,27 @@ public class ProjektController {
         projektEntity = this.projektService.save(projektEntity);
 
         List<String> geplanteQualifikationen = new ArrayList<>();
+        List<Long> geplanteQualifikationenIds = new ArrayList<>();
         if (dto.getGeplanteQualifikationen() != null) {
             List<GeplanteQualifikationEntity> qualifikationEntities = this.geplanteQualifikationService.readByProjektId(projektId);
+            SkillDto[] allQualifikations = this.qualifikationApiService.getAllQualifikations(securityToken);
+
             for (String qualifikation : dto.getGeplanteQualifikationen()) {
-                if (qualifikationEntities.stream().filter(x -> x.getQualifikation().equals(qualifikation)).findAny().isEmpty()) {
-                    GeplanteQualifikationEntity geplanteQualifikationEntity = this.projektMappingService.mapDataToGeplanteQualifikationEntity(projektEntity.getId(), qualifikation);
+                SkillDto matchingQualifikation = Arrays.stream(allQualifikations)
+                        .filter(x -> qualifikation.equals(x.getSkill())).findFirst().orElse(null);
+                if (matchingQualifikation == null) {
+                    throw new ResourceNotFoundException("Liste der geplanten Qualifikationen enthält eine ungültige Qualifikation");
+                }
+
+                if (qualifikationEntities.stream().filter(x -> x.getQualifikationId() == matchingQualifikation.getId()).findAny().isEmpty()) {
+                    GeplanteQualifikationEntity geplanteQualifikationEntity = this.projektMappingService.mapDataToGeplanteQualifikationEntity(projektEntity.getId(), matchingQualifikation.getId());
                     geplanteQualifikationEntity = this.geplanteQualifikationService.create(geplanteQualifikationEntity);
-                    geplanteQualifikationen.add(geplanteQualifikationEntity.getQualifikation());
+                    geplanteQualifikationen.add(qualifikation);
+                    geplanteQualifikationenIds.add(matchingQualifikation.getId());
                 }
             }
             for (GeplanteQualifikationEntity qualifikationEntity : qualifikationEntities) {
-                if (geplanteQualifikationen.stream().filter(x -> x.equals(qualifikationEntity.getQualifikation())).findAny().isEmpty()) {
+                if (geplanteQualifikationenIds.stream().filter(x -> x.equals(qualifikationEntity.getQualifikationId())).findAny().isEmpty()) {
                     this.geplanteQualifikationService.delete(qualifikationEntity);
                 }
             }

@@ -17,8 +17,8 @@ public class QualifikationApiService {
     private final RestTemplate restTemplate;
     private static final String QUALIFICATION_API_URL = "https://employee-api.szut.dev/qualifications";
 
-    public QualifikationApiService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public QualifikationApiService() {
+        this.restTemplate = new RestTemplate();
     }
 
     public SkillDto[] getAllQualifikations(String securityToken) {
