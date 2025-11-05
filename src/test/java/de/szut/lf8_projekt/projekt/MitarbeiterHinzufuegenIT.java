@@ -221,7 +221,7 @@ public class MitarbeiterHinzufuegenIT extends AbstractIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .with(csrf()))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message", is("Das Projekt mit der id 3 existiert nicht.")));
+                .andExpect(jsonPath("$.message", is("Projekt mit der ID 3 existiert nicht")));
     }
 
     @Test

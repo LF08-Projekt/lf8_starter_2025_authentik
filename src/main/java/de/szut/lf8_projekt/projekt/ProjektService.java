@@ -123,7 +123,8 @@ public class ProjektService {
      */
     public ProjektEntity readById(Long id) {
         Optional<ProjektEntity> optionalProjekt = this.repository.findById(id);
-        return optionalProjekt.orElse(null);
+        return optionalProjekt.orElseThrow(() ->
+            new ResourceNotFoundException("Projekt mit der ID " + id + " existiert nicht"));
     }
 
     /**
@@ -180,9 +181,6 @@ public class ProjektService {
      */
     public ProjektGetDto holeProjektDetails(Long projektId, String securityToken) {
         ProjektEntity projekt = readById(projektId);
-        if (projekt == null) {
-            throw new ResourceNotFoundException("Das Projekt mit der ID " + projektId + " existiert nicht.");
-        }
 
         List<GeplanteQualifikationEntity> geplant = geplanteQualifikationRepository.getGeplanteQualifikationEntitiesByProjektId(projektId);
         List<String> geplanteQualifikationen = new ArrayList<>();
@@ -222,9 +220,6 @@ public class ProjektService {
      */
     public ProjektMitarbeiterGetDto holeProjektMitarbeiter(Long projektId, String securityToken) {
         ProjektEntity projekt = readById(projektId);
-        if (projekt == null) {
-            throw new ResourceNotFoundException("Das Projekt mit der ID " + projektId + " existiert nicht.");
-        }
 
         List<MitarbeiterZuordnungEntity> zuordnungen = mitarbeiterZuordnungRepository.getMitarbeiterZuordnungEntitiesByProjektId(projektId);
         List<MitarbeiterImProjektDto> mitarbeiter = new ArrayList<>();
@@ -292,9 +287,6 @@ public class ProjektService {
      */
     public ProjektLoeschenResponseDto loescheProjekt(Long projektId, String securityToken) {
         ProjektEntity projekt = readById(projektId);
-        if (projekt == null) {
-            throw new ResourceNotFoundException("Das Projekt mit der ID " + projektId + " existiert nicht.");
-        }
 
         List<GeplanteQualifikationEntity> geplant = geplanteQualifikationRepository.getGeplanteQualifikationEntitiesByProjektId(projektId);
         List<String> benoetigteQualifikationen = new ArrayList<>();

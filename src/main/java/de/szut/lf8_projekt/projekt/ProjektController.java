@@ -1,6 +1,8 @@
 package de.szut.lf8_projekt.projekt;
 
-import de.szut.lf8_projekt.exceptionHandling.*;
+import de.szut.lf8_projekt.exceptionHandling.ResourceNotFoundException;
+import de.szut.lf8_projekt.exceptionHandling.ResourceConflictException;
+import de.szut.lf8_projekt.exceptionHandling.SleepyException;
 import de.szut.lf8_projekt.mapping.MitarbeiterMappingService;
 import de.szut.lf8_projekt.mitarbeiter.SkillDto;
 import de.szut.lf8_projekt.ValidationService;
@@ -186,9 +188,6 @@ public class ProjektController {
         String securityToken = jwt != null ? jwt.getTokenValue() : null;
         boolean qualifikationInProjekt = false;
         ProjektEntity projekt = this.projektService.readById(projekt_id);
-        if (projekt == null) {
-            throw new ResourceNotFoundException("Das Projekt mit der id " + projekt_id + " existiert nicht.");
-        }
         MitarbeiterDto mitarbeiterDto = this.mitarbeiterApiService.getMitarbeiterById(mitarbeiter_id, securityToken);
         if (mitarbeiterDto == null) {
             throw new ResourceNotFoundException("Der Mitarbeiter mit der Id " + mitarbeiter_id + " existiert nicht");
@@ -260,9 +259,6 @@ public class ProjektController {
             @Parameter(description = "ID des zu aktualisierenden Projekts", example = "1") @PathVariable Long projektId,
             @AuthenticationPrincipal Jwt jwt) {
         ProjektEntity previousSaveState = this.projektService.readById(projektId);
-        if (previousSaveState == null) {
-            throw new ResourceNotFoundException("Projekt mit der ID " + projektId + " existiert nicht");
-        }
 
         String securityToken = jwt != null ? jwt.getTokenValue() : null;
         if (dto.getVerantwortlicherId() != null && !this.validationService.validateMitarbeiterId(dto.getVerantwortlicherId(), securityToken)) {
@@ -274,18 +270,18 @@ public class ProjektController {
         if (dto.getGeplanteQualifikationen() != null && !this.validationService.validateQualifications(Arrays.asList(dto.getGeplanteQualifikationen()), securityToken)) {
             throw new ResourceNotFoundException("Liste der geplanten Qualifikationen enthält eine ungültige Qualifikation");
         }
-        if (dto.getWirklichesEnddatum() != null && dto.getWirklichesEnddatum().isBefore(dto.getStartdatum())) {
+        if (dto.getWirklichesEnddatum() != null && dto.getStartdatum() != null && dto.getWirklichesEnddatum().isBefore(dto.getStartdatum())) {
             throw new SleepyException("Das wirkliche Ende des Projekts kann nicht vor dem Start des Projekts liegen");
         }
         if (dto.getGeplantesEnddatum() != null) {
-            if (dto.getGeplantesEnddatum().isBefore(dto.getStartdatum())) {
+            if (dto.getStartdatum() != null && dto.getGeplantesEnddatum().isBefore(dto.getStartdatum())) {
                 throw new SleepyException("Das geplante Ende des Projekts kann nicht vor dem Start des Projekts liegen");
             }
 
             LocalDateTime neuesGeplantesEnddatum = dto.getGeplantesEnddatum();
             List<ProjektEntity> possibleCollisions = this.projektService.readByDate(previousSaveState.getGeplantesEnddatum(), neuesGeplantesEnddatum);
             for (ProjektEntity projektEntity : possibleCollisions) {
-                if (projektEntity.getId() != projektId) {
+                if (!Objects.equals(projektEntity.getId(), projektId)) {
                     List<MitarbeiterZuordnungEntity> mitarbeiterZuordnungEntities
                             = mitarbeiterZuordnungService.getMitarbeiterZuordnungEntitiesByProjektId(projektId);
 
@@ -316,7 +312,7 @@ public class ProjektController {
                     throw new ResourceNotFoundException("Liste der geplanten Qualifikationen enthält eine ungültige Qualifikation");
                 }
 
-                if (qualifikationEntities.stream().filter(x -> x.getQualifikationId() == matchingQualifikation.getId()).findAny().isEmpty()) {
+                if (qualifikationEntities.stream().filter(x -> Objects.equals(x.getQualifikationId(), matchingQualifikation.getId())).findAny().isEmpty()) {
                     GeplanteQualifikationEntity geplanteQualifikationEntity = this.projektMappingService.mapDataToGeplanteQualifikationEntity(projektEntity.getId(), matchingQualifikation.getId());
                     geplanteQualifikationEntity = this.geplanteQualifikationService.create(geplanteQualifikationEntity);
                     geplanteQualifikationen.add(qualifikation);

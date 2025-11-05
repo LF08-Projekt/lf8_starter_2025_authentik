@@ -195,7 +195,7 @@ public class MitarbeiterZuordnungService {
     public List<MitarbeiterZuordnungEntity> getAllProjektsFromMitarbeiter(Long mitarbeiterId) {
         Optional<List<MitarbeiterZuordnungEntity>> mitarbeiterZuordnungen = this.repository.findAllByMitarbeiterId(mitarbeiterId);
         if(mitarbeiterZuordnungen.isEmpty()) {
-            throw new ResourceNotFoundException("Es wurden keine Projekte mit der Mitarbeiter Id" + mitarbeiterId + " gefundne");
+            throw new ResourceNotFoundException("Es wurden keine Projekte mit der Mitarbeiter Id" + mitarbeiterId + " gefunden");
         }
         return mitarbeiterZuordnungen.get();
     }

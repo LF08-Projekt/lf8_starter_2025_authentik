@@ -22,44 +22,34 @@ public class QualifikationApiService {
     }
 
     public SkillDto[] getAllQualifikations(String securityToken) {
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(securityToken);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(securityToken);
 
-            HttpEntity<Void> request = new HttpEntity<>(headers);
-            ResponseEntity<SkillDto[]> resp = restTemplate.exchange(
-                    QUALIFICATION_API_URL, HttpMethod.GET, request, SkillDto[].class);
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+        ResponseEntity<SkillDto[]> resp = restTemplate.exchange(
+                QUALIFICATION_API_URL, HttpMethod.GET, request, SkillDto[].class);
 
-            var respBody = resp.getBody();
-            if (respBody == null) {
-                throw new ResourceNotFoundException("No list of qualifications was found");
-            }
-
-            return respBody;
+        var respBody = resp.getBody();
+        if (respBody == null) {
+            throw new ResourceNotFoundException("No list of qualifications was found");
         }
-        catch (Exception e) {
-            throw e;
-        }
+
+        return respBody;
     }
 
     public SkillDto getQualifikationById(Long id, String securityToken) {
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(securityToken);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(securityToken);
 
-            HttpEntity<Void> request = new HttpEntity<>(headers);
-            ResponseEntity<SkillDto> resp = restTemplate.exchange(
-                    QUALIFICATION_API_URL + "/" + id, HttpMethod.GET, request, SkillDto.class);
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+        ResponseEntity<SkillDto> resp = restTemplate.exchange(
+                QUALIFICATION_API_URL + "/" + id, HttpMethod.GET, request, SkillDto.class);
 
-            var respBody = resp.getBody();
-            if (respBody == null) {
-                throw new ResourceNotFoundException("No list of qualifications was found");
-            }
-
-            return respBody;
+        var respBody = resp.getBody();
+        if (respBody == null) {
+            throw new ResourceNotFoundException("No list of qualifications was found");
         }
-        catch (Exception e) {
-            throw e;
-        }
+
+        return respBody;
     }
 }
