@@ -7,19 +7,27 @@ import org.springframework.stereotype.Service;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterDto;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterEntfernenResponseDto;
 import de.szut.lf8_projekt.exceptionHandling.ResourceNotFoundException;
-import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service-Klasse für die Geschäftslogik rund um Mitarbeiter-Projekt-Zuordnungen.
+ * Verwaltet die Zuordnung von Mitarbeitern zu Projekten und prüft deren Verfügbarkeit.
+ */
 @Service
 public class MitarbeiterZuordnungService {
     private final MitarbeiterZuordnungRepository repository;
     private final ProjektService projektService;
     private final MitarbeiterApiService mitarbeiterApiService;
 
+    /**
+     * Konstruktor für den MitarbeiterZuordnungService.
+     *
+     * @param repository Repository für Mitarbeiter-Zuordnungen
+     * @param projektService Service für Projekt-Operationen
+     * @param mitarbeiterApiService Service für externe Mitarbeiter-API-Aufrufe
+     */
     public MitarbeiterZuordnungService(MitarbeiterZuordnungRepository repository,
                                        ProjektService projektService,
                                        MitarbeiterApiService mitarbeiterApiService) {
@@ -28,26 +36,61 @@ public class MitarbeiterZuordnungService {
         this.mitarbeiterApiService = mitarbeiterApiService;
     }
 
+    /**
+     * Erstellt eine neue Mitarbeiter-Projekt-Zuordnung.
+     *
+     * @param entity Die zu speichernde Zuordnung
+     * @return Die gespeicherte Zuordnung mit generierter ID
+     */
     public MitarbeiterZuordnungEntity create(MitarbeiterZuordnungEntity entity) {
         return this.repository.save(entity);
     }
 
+    /**
+     * Liest alle Mitarbeiter-Projekt-Zuordnungen.
+     *
+     * @return Liste aller Zuordnungen
+     */
     public List<MitarbeiterZuordnungEntity> readAll() {
         return this.repository.findAll();
     }
 
+    /**
+     * Findet alle Mitarbeiterzuordnungen für ein bestimmtes Projekt.
+     *
+     * @param projektId Die ID des Projekts
+     * @return Liste aller Mitarbeiter, die dem Projekt zugeordnet sind
+     */
     public List<MitarbeiterZuordnungEntity> getMitarbeiterZuordnungEntitiesByProjektId(Long projektId) {
         return this.repository.getMitarbeiterZuordnungEntitiesByProjektId(projektId);
     }
+
+    /**
+     * Findet alle Projektzuordnungen für einen bestimmten Mitarbeiter.
+     *
+     * @param mitarbeiterId Die ID des Mitarbeiters
+     * @return Liste aller Projekte, denen der Mitarbeiter zugeordnet ist
+     */
     public List<MitarbeiterZuordnungEntity> getMitarbeiterZuordnungEntitiesByMitarbeiterId(Long mitarbeiterId) {
         return this.repository.getMitarbeiterZuordnungEntitiesByMitarbeiterId(mitarbeiterId);
     }
 
+    /**
+     * Liest eine Mitarbeiter-Zuordnung anhand ihrer ID.
+     *
+     * @param id Die ID der Zuordnung
+     * @return Die gefundene Zuordnung oder null wenn nicht gefunden
+     */
     public MitarbeiterZuordnungEntity readById(Long id) {
         Optional<MitarbeiterZuordnungEntity> optionalProjekt = this.repository.findById(id);
         return optionalProjekt.orElse(null);
     }
 
+    /**
+     * Löscht eine Mitarbeiter-Projekt-Zuordnung.
+     *
+     * @param entity Die zu löschende Zuordnung
+     */
     public void delete(MitarbeiterZuordnungEntity entity) {
         this.repository.delete(entity);
     }
@@ -142,6 +185,13 @@ public class MitarbeiterZuordnungService {
         return true;
     }
 
+    /**
+     * Findet alle Projekte eines Mitarbeiters.
+     *
+     * @param mitarbeiterId Die ID des Mitarbeiters
+     * @return Liste aller Projektzuordnungen des Mitarbeiters
+     * @throws ResourceNotFoundException wenn keine Projekte für den Mitarbeiter gefunden wurden
+     */
     public List<MitarbeiterZuordnungEntity> getAllProjektsFromMitarbeiter(Long mitarbeiterId) {
         Optional<List<MitarbeiterZuordnungEntity>> mitarbeiterZuordnungen = this.repository.findAllByMitarbeiterId(mitarbeiterId);
         if(mitarbeiterZuordnungen.isEmpty()) {

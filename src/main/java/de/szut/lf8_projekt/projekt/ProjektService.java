@@ -9,19 +9,20 @@ import de.szut.lf8_projekt.projekt.dto.ProjektMitarbeiterGetDto;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationEntity;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationRepository;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterApiService;
-import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungEntity;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungRepository;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterDto;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service-Klasse für die Geschäftslogik rund um Projekte.
+ * Verwaltet CRUD-Operationen und komplexe Abfragen auf Projekten.
+ */
 @Service
 public class ProjektService {
     private final ProjektRepository repository;
@@ -30,6 +31,15 @@ public class ProjektService {
     private final MitarbeiterZuordnungRepository mitarbeiterZuordnungRepository;
     private final MitarbeiterApiService mitarbeiterApiService;
 
+    /**
+     * Konstruktor für den ProjektService.
+     *
+     * @param repository Repository für Projekt-Datenbank-Operationen
+     * @param geplanteQualifikationRepository Repository für geplante Qualifikationen
+     * @param mitarbeiterZuordnungRepository Repository für Mitarbeiterzuordnungen
+     * @param mitarbeiterApiService Service für externe Mitarbeiter-API-Aufrufe
+     * @param projektMappingService Service für Projekt-Mappings
+     */
     public ProjektService(ProjektRepository repository,
                           GeplanteQualifikationRepository geplanteQualifikationRepository,
                           MitarbeiterZuordnungRepository mitarbeiterZuordnungRepository,
@@ -42,10 +52,24 @@ public class ProjektService {
         this.mitarbeiterApiService = mitarbeiterApiService;
     }
 
+    /**
+     * Erstellt ein neues Projekt in der Datenbank.
+     *
+     * @param entity Das zu speichernde Projekt-Entity
+     * @return Das gespeicherte Projekt-Entity mit generierter ID
+     */
     public ProjektEntity create(ProjektEntity entity) {
         return this.repository.save(entity);
     }
 
+    /**
+     * Aktualisiert ein bestehendes Projekt.
+     * Nur die im übergebenen Entity gesetzten Felder (nicht null) werden aktualisiert.
+     *
+     * @param entity Das Entity mit den zu aktualisierenden Feldern
+     * @return Das aktualisierte Projekt-Entity
+     * @throws ResourceNotFoundException wenn das Projekt nicht existiert
+     */
     public ProjektEntity save(ProjektEntity entity) {
         ProjektEntity updatedProjektEntity = readById(entity.getId());
         if (entity.getBezeichnung() != null) {
@@ -75,23 +99,55 @@ public class ProjektService {
         return this.repository.save(updatedProjektEntity);
     }
 
+    /**
+     * Liest alle Projekte aus der Datenbank.
+     *
+     * @return Liste aller Projekte
+     */
     public List<ProjektEntity> readAll() {
         return this.repository.findAll();
     }
 
+    /**
+     * Liest ein Projekt anhand seiner ID.
+     *
+     * @param id Die ID des Projekts
+     * @return Das gefundene Projekt-Entity
+     * @throws ResourceNotFoundException wenn kein Projekt mit dieser ID existiert
+     */
     public ProjektEntity readById(Long id) {
         Optional<ProjektEntity> optionalProjekt = this.repository.findById(id);
         return optionalProjekt.orElse(null);
     }
 
+    /**
+     * Löscht ein Projekt aus der Datenbank.
+     *
+     * @param entity Das zu löschende Projekt-Entity
+     */
     public void delete(ProjektEntity entity) {
         this.repository.delete(entity);
     }
 
+    /**
+     * Findet alle Projekte, deren Start- oder Enddatum im angegebenen Zeitraum liegt.
+     * Wird verwendet um Konflikte bei Mitarbeiterzuordnungen zu erkennen.
+     *
+     * @param startdatum Beginn des Zeitraums
+     * @param endDatum Ende des Zeitraums
+     * @return Liste aller Projekte im angegebenen Zeitraum
+     */
     public List<ProjektEntity> readByDate(LocalDateTime startdatum, LocalDateTime endDatum) {
         return this.repository.findAllByStartdatumIsBetweenOrGeplantesEnddatumIsBetween(startdatum, endDatum, startdatum, endDatum);
     }
 
+    /**
+     * Liest alle Projekte eines Mitarbeiters anhand seiner Zuordnungen.
+     * Konvertiert die Projekt-Entities in kompakte DTOs.
+     *
+     * @param mitarbeiterZuordnungen Liste der Zuordnungen des Mitarbeiters
+     * @return Liste der Projekte in kompakter Form
+     */
     public List<ProjektCompactDto> readByMitarbeiterId(List<MitarbeiterZuordnungEntity> mitarbeiterZuordnungen) {
         List<ProjektCompactDto> projekts = new ArrayList<>();
         for(MitarbeiterZuordnungEntity mitarbeiterZuordnung: mitarbeiterZuordnungen) {
