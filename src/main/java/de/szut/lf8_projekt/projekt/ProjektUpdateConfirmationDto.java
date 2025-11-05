@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -26,11 +27,11 @@ public class ProjektUpdateConfirmationDto {
     @Schema(description = "Eine kurze Beschreibung des Projektziels", example = "Erschaffung eines einfaches Projektmanagementsystem")
     private String projektzielKommentar;
     @Schema(description = "Startdatum (ISO-8601)", example = "2025-10-15T00:00:00Z")
-    private Date startdatum;
+    private LocalDateTime startdatum;
     @Schema(description = "Geplantes Enddatum (ISO-8601)", example = "2026-01-31T23:59:59Z")
-    private Date geplantesEnddatum;
+    private LocalDateTime geplantesEnddatum;
     @Schema(description = "Tatsächliche Enddatum (ISO-8601)", example = "2026-02-15T23:59:59Z")
-    private Date wirklichesEnddatum;
+    private LocalDateTime wirklichesEnddatum;
     @Schema(description = "Liste der für das Projekt geplanten Qualifikationen", example = "[\"Java\",\"Angular\"]")
     private List<String> geplanteQualifikationen;
 }
