@@ -117,10 +117,7 @@ public class ProjektService {
      */
     public ProjektEntity readById(Long id) {
         Optional<ProjektEntity> optionalProjekt = this.repository.findById(id);
-        if (optionalProjekt.isEmpty()) {
-            throw new ResourceNotFoundException("Das Projekt mit der id " + id + " existiert nicht.");
-        }
-        return optionalProjekt.get();
+        return optionalProjekt.orElse(null);
     }
 
     /**

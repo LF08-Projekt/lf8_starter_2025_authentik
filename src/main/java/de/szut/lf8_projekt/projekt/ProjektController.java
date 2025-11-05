@@ -1,10 +1,9 @@
 package de.szut.lf8_projekt.projekt;
 
+import de.szut.lf8_projekt.exceptionHandling.*;
 import de.szut.lf8_projekt.mapping.MitarbeiterMappingService;
 import de.szut.lf8_projekt.mitarbeiter.SkillDto;
 import de.szut.lf8_projekt.ValidationService;
-import de.szut.lf8_projekt.exceptionHandling.ResourceConflictException;
-import de.szut.lf8_projekt.exceptionHandling.ResourceNotFoundException;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationEntity;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationService;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterApiService;
@@ -108,6 +107,8 @@ public class ProjektController {
             @ApiResponse(responseCode = "400", description = "Fehlende Pflichtangabe im DTO", content = @Content),
             @ApiResponse(responseCode = "404", description = "Der verantwortliche Mitarbeiter, Kunde oder" +
                     " eine der geplanten Qualifikationen konnte nicht gefunden werden", content = @Content),
+            @ApiResponse(responseCode = "425", description = "Das geplante Ende des Projekts kann nicht vor dem wirklichen Ende des " +
+                    "Projektes liegen", content = @Content),
             @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
     })
     @PostMapping(path="/Projekt")
@@ -122,6 +123,9 @@ public class ProjektController {
         }
         if (dto.getGeplanteQualifikationen() != null && !this.validationService.validateQualifications(Arrays.asList(dto.getGeplanteQualifikationen()), securityToken)) {
             throw new ResourceNotFoundException("Liste der geplanten Qualifikationen enthält eine ungültige Qualifikation");
+        }
+        if (dto.getGeplantesEnddatum().isBefore(dto.getStartdatum())) {
+            throw new SleepyException("Das geplante Ende des Projekts kann nicht vor dem Start des Projekts liegen");
         }
 
         ProjektEntity projektEntity = this.projektMappingService.mapProjektCreateDtoToProjektEntity(dto);
@@ -167,6 +171,9 @@ public class ProjektController {
             @Valid @RequestBody final SkillDto skill) {
         boolean qualifikationInProjekt = false;
         ProjektEntity projekt = this.projektService.readById(projekt_id);
+        if (projekt == null) {
+            throw new ResourceNotFoundException("Das Projekt mit der id " + projekt_id + " existiert nicht.");
+        }
         MitarbeiterDto mitarbeiterDto = this.mitarbeiterApiService.getMitarbeiterById(mitarbeiter_id);
         if (mitarbeiterDto == null) {
             throw new ResourceNotFoundException("Der Mitarbeiter mit der Id " + mitarbeiter_id + " existiert nicht");
@@ -219,16 +226,18 @@ public class ProjektController {
      * @throws ResourceNotFoundException wenn Projekt, Mitarbeiter, Kunde oder Qualifikationen nicht gefunden werden
      * @throws ResourceConflictException wenn Mitarbeiter im neuen Zeitraum bereits verplant sind
      */
-    @Operation(summary = "Aktualisiert ein bestehendes Projekt")
+    @Operation(summary = "Bearbeitet die Daten eines Projekts")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Das Projekt wurde erfolgreich aktualisiert",
+            @ApiResponse(responseCode = "200", description = "Das Projekt wurde erfolgreich bearbeitet",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = ProjektUpdateConfirmationDto.class))}),
             @ApiResponse(responseCode = "400", description = "Fehlende Pflichtangabe im DTO", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Projekt, verantwortlicher Mitarbeiter, Kunde oder " +
-                    "eine der geplanten Qualifikationen konnte nicht gefunden werden", content = @Content),
-            @ApiResponse(responseCode = "409", description = "Konflikt: Mitarbeiter bereits im neuen Zeitraum verplant", content = @Content),
-            @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
+            @ApiResponse(responseCode = "404", description = "Das zu bearbeitende Projekt, der verantwortliche Mitarbeiter, Kunde oder" +
+                    " eine der geplanten Qualifikationen konnte nicht gefunden werden", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Beim Verschieben des geplanten Enddatum des Projektes ist ein Konflikt aufgetreten, " +
+                    "weil einer der geplanten Mitarbeiter zu diesem Zeitpunkt bereits in einem anderen Projekt eingeplant ist", content = @Content),
+            @ApiResponse(responseCode = "425", description = "Das geplante oder wirkliche Ende des Projekts kann nicht vor dem " +
+                    "Start des Projektes liegen", content = @Content),
     })
     @PutMapping(path="/Projekt/{projektId}")
     public ProjektUpdateConfirmationDto updateProjekt(
@@ -245,12 +254,19 @@ public class ProjektController {
             throw new ResourceNotFoundException("Mitarbeiter mit der ID " + dto.getVerantwortlicherId() + " existiert nicht!");
         }
         if (dto.getKundenId() != null && !this.validationService.validateKundenId(dto.getKundenId(), securityToken)) {
-            throw new ResourceNotFoundException("Kunde mit der ID + " + dto.getKundenId() + " existiert nicht!");
+            throw new ResourceNotFoundException("Kunde mit der ID " + dto.getKundenId() + " existiert nicht!");
         }
         if (dto.getGeplanteQualifikationen() != null && !this.validationService.validateQualifications(Arrays.asList(dto.getGeplanteQualifikationen()), securityToken)) {
             throw new ResourceNotFoundException("Liste der geplanten Qualifikationen enthält eine ungültige Qualifikation");
         }
+        if (dto.getWirklichesEnddatum() != null && dto.getWirklichesEnddatum().isBefore(dto.getStartdatum())) {
+            throw new SleepyException("Das wirkliche Ende des Projekts kann nicht vor dem Start des Projekts liegen");
+        }
         if (dto.getGeplantesEnddatum() != null) {
+            if (dto.getGeplantesEnddatum().isBefore(dto.getStartdatum())) {
+                throw new SleepyException("Das geplante Ende des Projekts kann nicht vor dem Start des Projekts liegen");
+            }
+
             LocalDateTime neuesGeplantesEnddatum = dto.getGeplantesEnddatum();
             List<ProjektEntity> possibleCollisions = this.projektService.readByDate(previousSaveState.getGeplantesEnddatum(), neuesGeplantesEnddatum);
             for (ProjektEntity projektEntity : possibleCollisions) {

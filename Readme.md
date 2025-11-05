@@ -163,6 +163,15 @@ Die Anwendung integriert eine externe Mitarbeiter-API:
 - **Authentifizierung**: JWT Bearer Token (von Authentik)
 - Beispielanfragen in [SampleRequests.http](SampleRequests.http)
 
+# Projekt anlegen
+- Bei fehlenden Feldern kriege ich bei Postman keinen 400-Anwort, sondern das Feld wird einfach als null angelegt. 
+    Bei den Unittests wird jedoch wie erwartet eine 400-Antwort gesendet. Ich weiß nicht, woran das liegt.
+
+# Projekt bearbeiten
++ Wenn das geplante Enddatum eines Projekts 
+
+# Projekt nach Id abrufen
++ Die noch fehlenden Qualifikationen werden mit ausgegeben (weil noch kein Mitarbeiter mit den entsprechenden Qualifikationen hinzugefügt wurde)
 ## Troubleshooting
 
 ### Port 8080 bereits belegt
