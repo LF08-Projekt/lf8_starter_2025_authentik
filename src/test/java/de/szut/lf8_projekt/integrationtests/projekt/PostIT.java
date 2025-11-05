@@ -241,7 +241,7 @@ public class PostIT extends AbstractIntegrationTest {
         final var id = Long.parseLong(new JSONObject(contentAsString).get("id").toString());
 
         final var loadedEntity = projektRepository.findById(id);
-        final var loadedQualifications = geplanteQualifikationRepository.getGeplanteQualifikationEntitiesByProjektId(id);
+        final var loadedQualifications = this.geplanteQualifikationRepository.getGeplanteQualifikationEntitiesByProjektId(id);
 
         assertThat(loadedEntity).isPresent();
         assertThat(loadedEntity.get().getId()).isEqualTo(id);

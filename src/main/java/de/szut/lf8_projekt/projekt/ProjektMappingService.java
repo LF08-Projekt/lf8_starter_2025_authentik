@@ -43,4 +43,31 @@ public class ProjektMappingService {
         projektCompactDto.setVerantwortlicherId(projektEntity.getVerantwortlicherId());
         return projektCompactDto;
     }
+    public ProjektUpdateConfirmationDto mapProjektEntityToProjektUpdateConfirmationDto(ProjektEntity entity) {
+        ProjektUpdateConfirmationDto dto = new ProjektUpdateConfirmationDto();
+        dto.setId(entity.getId());
+        dto.setBezeichnung(entity.getBezeichnung());
+        dto.setVerantwortlicherId(entity.getVerantwortlicherId());
+        dto.setKundenId(entity.getKundenId());
+        dto.setKundeAnsprechperson(entity.getKundeAnsprechperson());
+        dto.setProjektzielKommentar(entity.getProjektzielKommentar());
+        dto.setStartdatum(entity.getStartdatum());
+        dto.setGeplantesEnddatum(entity.getGeplantesEnddatum());
+        dto.setWirklichesEnddatum(entity.getWirklichesEnddatum());
+        return dto;
+    }
+
+    public ProjektEntity mapProjektUpdateDtoToProjektEntity(ProjektUpdateDto dto, Long id) {
+        ProjektEntity entity = new ProjektEntity();
+        entity.setId(id);
+        entity.setBezeichnung(dto.getBezeichnung());
+        entity.setVerantwortlicherId(dto.getVerantwortlicherId());
+        entity.setKundenId(dto.getKundenId());
+        entity.setKundeAnsprechperson(dto.getKundeAnsprechperson());
+        entity.setProjektzielKommentar(dto.getProjektzielKommentar());
+        entity.setStartdatum(dto.getStartdatum());
+        entity.setGeplantesEnddatum(dto.getGeplantesEnddatum());
+        entity.setWirklichesEnddatum(dto.getWirklichesEnddatum());
+        return entity;
+    }
 }
