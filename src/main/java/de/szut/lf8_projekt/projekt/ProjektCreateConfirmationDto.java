@@ -9,6 +9,9 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * DTO, das die Daten nach erfolgreicher Projekterstellung zurückgibt.
+ */
 @NoArgsConstructor
 @Getter
 @Setter

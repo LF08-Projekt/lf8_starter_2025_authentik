@@ -9,6 +9,9 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO zur Erstellung eines Projekts.
+ */
 @Getter
 @Setter
 @Schema(description = "DTO zum Erstellen eines Projekts")

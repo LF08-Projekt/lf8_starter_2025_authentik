@@ -16,6 +16,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+/**
+ * Sicherheitskonfiguration für die Authentik-basierte JWT-Validierung.
+ * Aktiviert Methodensicherheit, konfiguriert CORS/CSRF und schützt die Projektendpunkte.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(jsr250Enabled = true)
@@ -25,20 +29,31 @@ public class AuthentikSecurityConfig {
     @Value("${authentik.jwk-set-uri}")
     private String jwkSetUri;
 
+    /**
+     * Erstellt den {@link JwtDecoder} für die Validierung von JWTs anhand des JWK-Set-URIs.
+     *
+     * @return konfigurierter JwtDecoder
+     */
     @Bean
     public JwtDecoder jwtDecoder() {
         return NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
     }
 
+    /**
+     * Konfiguriert die HTTP-Sicherheitskette: CORS, CSRF und OAuth2 Resource Server (JWT).
+     * Schützt die Endpunkte unter {@code /LF08Projekt/**}.
+     *
+     * @param http HttpSecurity-Builder
+     * @return erstellte SecurityFilterChain
+     * @throws Exception bei Konfigurationsfehlern
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> {
-
-                        })
+                        .jwt(jwt -> { })
                 )
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/LF08Projekt").authenticated()
@@ -49,6 +64,11 @@ public class AuthentikSecurityConfig {
         return http.build();
     }
 
+    /**
+     * Basiskonfiguration für CORS, erlaubt Standard-Methoden und gängige Header.
+     *
+     * @return CORS-Configuration-Source
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
@@ -60,6 +80,5 @@ public class AuthentikSecurityConfig {
         source.registerCorsConfiguration("/**", cfg);
         return source;
     }
-
 
 }

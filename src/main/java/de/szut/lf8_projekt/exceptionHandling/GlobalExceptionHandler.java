@@ -15,6 +15,9 @@ import org.springframework.web.context.request.WebRequest;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
+/**
+ * Globale Exception-Handler-Klasse, die definierte Fehler in strukturierte HTTP-Antworten übersetzt.
+ */
 @ControllerAdvice
 @ApiResponses(value = {
         @ApiResponse(responseCode = "500", description = "invalid JSON posted",

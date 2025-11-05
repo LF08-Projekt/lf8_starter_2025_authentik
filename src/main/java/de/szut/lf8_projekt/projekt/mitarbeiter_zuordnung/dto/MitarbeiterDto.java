@@ -8,18 +8,29 @@ import lombok.Setter;
 
 import java.util.List;
 
+/**
+ * DTO, das einen Mitarbeiter aus der externen Employee-API abbildet.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 public class MitarbeiterDto {
+    /** Eindeutige Mitarbeiter-ID */
     private Long id;
+    /** Vorname */
     private String vorname;
+    /** Nachname */
     private String nachname;
+    /** Straße */
     private String strasse;
+    /** Postleitzahl */
     private String postleitzahl;
+    /** Stadt */
     private String stadt;
+    /** Telefonnummer */
     private String telefon;
+    /** Liste der Qualifikationen */
     private List<SkillDto> skillSet;
 
     /**
