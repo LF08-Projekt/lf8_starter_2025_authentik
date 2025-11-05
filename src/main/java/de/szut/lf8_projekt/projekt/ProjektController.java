@@ -179,22 +179,17 @@ public class ProjektController {
             @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
     })
     @PostMapping("{projekt_id}/mitarbeiter/{mitarbeiter_id}")
-    public ResponseEntity<Object> addMitarbeiterToProjekt(@PathVariable final Long projekt_id, @PathVariable final Long mitarbeiter_id,
+    public ResponseEntity<Object> addMitarbeiterToProjekt(@Parameter(description = "ID des Projekts", example = "1")@PathVariable final Long projekt_id, @Parameter(description = "ID des Mitarbeiters", example = "42")
+                                                                    @PathVariable final Long mitarbeiter_id,
                                                                     @Valid @RequestBody final SkillDto skill,
                                                                     @AuthenticationPrincipal Jwt jwt) {
         String securityToken = jwt != null ? jwt.getTokenValue() : null;
-    public ResponseEntity<Object> addMitarbeiterToProjekt(
-            @Parameter(description = "ID des Projekts", example = "1") @PathVariable final Long projekt_id,
-            @Parameter(description = "ID des Mitarbeiters", example = "42") @PathVariable final Long mitarbeiter_id,
-            @Valid @RequestBody final SkillDto skill) {
         boolean qualifikationInProjekt = false;
         ProjektEntity projekt = this.projektService.readById(projekt_id);
-        MitarbeiterDto mitarbeiterDto = this.mitarbeiterApiService.getMitarbeiterById(mitarbeiter_id, securityToken);
-
         if (projekt == null) {
             throw new ResourceNotFoundException("Das Projekt mit der id " + projekt_id + " existiert nicht.");
         }
-        MitarbeiterDto mitarbeiterDto = this.mitarbeiterApiService.getMitarbeiterById(mitarbeiter_id);
+        MitarbeiterDto mitarbeiterDto = this.mitarbeiterApiService.getMitarbeiterById(mitarbeiter_id, securityToken);
         if (mitarbeiterDto == null) {
             throw new ResourceNotFoundException("Der Mitarbeiter mit der Id " + mitarbeiter_id + " existiert nicht");
         }
@@ -358,15 +353,11 @@ public class ProjektController {
     })
     @RequestMapping(value = "/{projektId}/mitarbeiter/{mitarbeiterId}", method = RequestMethod.DELETE)
     public ResponseEntity<MitarbeiterEntfernenResponseDto> entferneMitarbeiterAusProjekt(
-            @PathVariable Long projektId,
-            @PathVariable Long mitarbeiterId,
+            @Parameter(description = "ID des Projekts", example = "1") @PathVariable Long projektId,
+            @Parameter(description = "ID des Mitarbeiters", example = "42") @PathVariable Long mitarbeiterId,
             @AuthenticationPrincipal Jwt jwt) {
         String securityToken = jwt != null ? jwt.getTokenValue() : null;
         MitarbeiterEntfernenResponseDto response = mitarbeiterZuordnungService.entferneMitarbeiterAusProjekt(projektId, mitarbeiterId, securityToken);
-            @Parameter(description = "ID des Projekts", example = "1") @PathVariable Long projektId,
-            @Parameter(description = "ID des Mitarbeiters", example = "42") @PathVariable Long mitarbeiterId) {
-
-        MitarbeiterEntfernenResponseDto response = mitarbeiterZuordnungService.entferneMitarbeiterAusProjekt(projektId, mitarbeiterId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -384,10 +375,7 @@ public class ProjektController {
             @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
     })
     @GetMapping("/Mitarbeiter/{mitarbeiterId}/Projekt")
-    public ResponseEntity<Object> ReadProjektsByMitarbeiterId(@PathVariable final Long mitarbeiterId) {
-    @RequestMapping("/Mitarbeiter/{mitarbeiterId}/Projekt")
-    public ResponseEntity<Object> ReadProjektsByMitarbeiterId(
-            @Parameter(description = "ID des Mitarbeiters", example = "42") @PathVariable final Long mitarbeiterId) {
+    public ResponseEntity<Object> ReadProjektsByMitarbeiterId(@Parameter(description = "ID des Mitarbeiters", example = "42") @PathVariable final Long mitarbeiterId) {
         List<MitarbeiterZuordnungEntity> mitarbeiterZuordnungen = this.mitarbeiterZuordnungService.getAllProjektsFromMitarbeiter(mitarbeiterId);
         List<ProjektCompactDto> projekts = this.projektService.readByMitarbeiterId(mitarbeiterZuordnungen);
         return new ResponseEntity<>(projekts, HttpStatus.OK);
@@ -432,10 +420,7 @@ public class ProjektController {
         @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
     })
     @GetMapping(value = "/Projekt/{id}")
-    public ResponseEntity<ProjektGetDto> holeProjekt(
-            @Parameter(description = "ID des Projekts", example = "1") @PathVariable Long id) {
-        ProjektGetDto projekt = projektService.holeProjektDetails(id);
-    public ResponseEntity<ProjektGetDto> holeProjekt(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<ProjektGetDto> holeProjekt(@Parameter(description = "ID des Projekts", example = "1") @PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
         String securityToken = jwt != null ? jwt.getTokenValue() : null;
         ProjektGetDto projekt = projektService.holeProjektDetails(id, securityToken);
         return new ResponseEntity<>(projekt, HttpStatus.OK);
@@ -456,12 +441,10 @@ public class ProjektController {
         @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
     })
     @GetMapping(value = "/Projekt/{id}/Mitarbeiter")
-    public ResponseEntity<ProjektMitarbeiterGetDto> holeProjektMitarbeiter(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<ProjektMitarbeiterGetDto> holeProjektMitarbeiter(
+            @Parameter(description = "ID des Projekts", example = "1") @PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
         String securityToken = jwt != null ? jwt.getTokenValue() : null;
         ProjektMitarbeiterGetDto mitarbeiter = projektService.holeProjektMitarbeiter(id,securityToken);
-    public ResponseEntity<ProjektMitarbeiterGetDto> holeProjektMitarbeiter(
-            @Parameter(description = "ID des Projekts", example = "1") @PathVariable Long id) {
-        ProjektMitarbeiterGetDto mitarbeiter = projektService.holeProjektMitarbeiter(id);
         return new ResponseEntity<>(mitarbeiter, HttpStatus.OK);
     }
 
@@ -480,12 +463,9 @@ public class ProjektController {
         @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
     })
     @DeleteMapping(value = "/Projekt/{id}")
-    public ResponseEntity<ProjektLoeschenResponseDto> loescheProjekt(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<ProjektLoeschenResponseDto> loescheProjekt(@Parameter(description = "ID des zu löschenden Projekts", example = "1") @PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
         String securityToken = jwt != null ? jwt.getTokenValue() : null;
         ProjektLoeschenResponseDto response = projektService.loescheProjekt(id, securityToken);
-    public ResponseEntity<ProjektLoeschenResponseDto> loescheProjekt(
-            @Parameter(description = "ID des zu löschenden Projekts", example = "1") @PathVariable Long id) {
-        ProjektLoeschenResponseDto response = projektService.loescheProjekt(id);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
