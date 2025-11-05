@@ -6,6 +6,7 @@ import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungEnt
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterDto;
 import de.szut.lf8_projekt.testcontainers.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -15,8 +16,7 @@ import java.time.LocalDateTime;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -74,7 +74,7 @@ public class MitarbeiterEntfernenSecurityIT extends AbstractIntegrationTest {
         geplanteMitarbeiterZurdnungRepository.save(zuordnung);
 
         // Mock: Externe API wirft Exception (Timeout/Netzwerkfehler)
-        when(mitarbeiterApiService.getMitarbeiterById(42L, anyString()))
+        when(mitarbeiterApiService.getMitarbeiterById(any(Long.class), nullable(String.class)))
                 .thenThrow(new RestClientException("Connection timeout"));
 
         // Sollte 500 Internal Server Error zurückgeben
@@ -100,7 +100,7 @@ public class MitarbeiterEntfernenSecurityIT extends AbstractIntegrationTest {
         geplanteMitarbeiterZurdnungRepository.save(zuordnung);
 
         // Mock: Externe API gibt null zurück
-        when(mitarbeiterApiService.getMitarbeiterById(999L, anyString())).thenReturn(null);
+        when(mitarbeiterApiService.getMitarbeiterById(ArgumentMatchers.any(Long.class), nullable(String.class))).thenReturn(null);
 
         // Sollte 404 zurückgeben mit passender Fehlermeldung
         this.mockMvc.perform(delete("/LF08Projekt/" + projekt.getId() + "/mitarbeiter/999")
@@ -129,7 +129,7 @@ public class MitarbeiterEntfernenSecurityIT extends AbstractIntegrationTest {
         mitarbeiter.setId(42L);
         mitarbeiter.setVorname(null);
         mitarbeiter.setNachname(null);
-        when(mitarbeiterApiService.getMitarbeiterById(42L, anyString())).thenReturn(mitarbeiter);
+        when(mitarbeiterApiService.getMitarbeiterById(any(Long.class), nullable(String.class))).thenReturn(mitarbeiter);
 
         // Sollte trotzdem funktionieren, Name sollte jetzt "Unbekannt" sein (nicht "null null")
         this.mockMvc.perform(delete("/LF08Projekt/" + projekt.getId() + "/mitarbeiter/42")

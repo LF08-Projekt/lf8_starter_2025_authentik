@@ -23,8 +23,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -93,7 +92,7 @@ public class MitarbeiterHinzufuegenIT extends AbstractIntegrationTest {
         skills.add(skill);
         MitarbeiterDto mitarbeiter = setUpDefaultMitarbeiter();
         mitarbeiter.setSkillSet(skills);
-        when(mitarbeiterApiService.getMitarbeiterById(eq(42L), anyString())).thenReturn(mitarbeiter);
+        when(mitarbeiterApiService.getMitarbeiterById(any(Long.class), nullable(String.class))).thenReturn(mitarbeiter);
 
         //map skillDto to json string
         final ObjectMapper mapper = new ObjectMapper();
@@ -130,7 +129,7 @@ public class MitarbeiterHinzufuegenIT extends AbstractIntegrationTest {
         MitarbeiterDto mitarbeiter = setUpDefaultMitarbeiter();
         mitarbeiter.setSkillSet(skills);
         mitarbeiter.setSkillSet(skills);
-        when(mitarbeiterApiService.getMitarbeiterById(42L, anyString())).thenReturn(mitarbeiter);
+        when(mitarbeiterApiService.getMitarbeiterById(any(Long.class), nullable(String.class))).thenReturn(mitarbeiter);
 
         //map skillDto to json string
         final ObjectMapper mapper = new ObjectMapper();
@@ -150,7 +149,7 @@ public class MitarbeiterHinzufuegenIT extends AbstractIntegrationTest {
     void mitarbeiterDoesntMeetRequirements() throws Exception {
         ProjektEntity projekt = setUpDefaultProjektEntity();
         MitarbeiterDto mitarbeiter = setUpDefaultMitarbeiter();
-        when(mitarbeiterApiService.getMitarbeiterById(42L, anyString())).thenReturn(mitarbeiter);
+        when(mitarbeiterApiService.getMitarbeiterById(any(Long.class), nullable(String.class))).thenReturn(mitarbeiter);
         SkillDto mSkill = createSkillDto(2L,"Ruby");
         SkillDto skill = createSkillDto(1L, "Java");
         List<SkillDto> skills = new ArrayList<>();
@@ -181,7 +180,7 @@ public class MitarbeiterHinzufuegenIT extends AbstractIntegrationTest {
         List<SkillDto> skills = new ArrayList<>();
         skills.add(skill);
         mitarbeiter.setSkillSet(skills);
-        when(mitarbeiterApiService.getMitarbeiterById(42L, anyString())).thenReturn(mitarbeiter);
+        when(mitarbeiterApiService.getMitarbeiterById(any(Long.class), nullable(String.class))).thenReturn(mitarbeiter);
 
         MitarbeiterZuordnungEntity mitarbeiterZuordnungEntity = new MitarbeiterZuordnungEntity();
         mitarbeiterZuordnungEntity.setMitarbeiterId(42L);
@@ -211,7 +210,7 @@ public class MitarbeiterHinzufuegenIT extends AbstractIntegrationTest {
         List<SkillDto> skills = new ArrayList<>();
         skills.add(skill);
         mitarbeiter.setSkillSet(skills);
-        when(mitarbeiterApiService.getMitarbeiterById(42L, anyString())).thenReturn(mitarbeiter);
+        when(mitarbeiterApiService.getMitarbeiterById(any(Long.class), nullable(String.class))).thenReturn(mitarbeiter);
 
         //map skillDto to json string
         final ObjectMapper mapper = new ObjectMapper();
@@ -236,7 +235,7 @@ public class MitarbeiterHinzufuegenIT extends AbstractIntegrationTest {
         List<SkillDto> skills = new ArrayList<>();
         skills.add(skill);
         mitarbeiter.setSkillSet(skills);
-        when(mitarbeiterApiService.getMitarbeiterById(42L, anyString())).thenReturn(null);
+        when(mitarbeiterApiService.getMitarbeiterById(any(Long.class), nullable(String.class))).thenReturn(null);
 
         //map skillDto to json string
         final ObjectMapper mapper = new ObjectMapper();

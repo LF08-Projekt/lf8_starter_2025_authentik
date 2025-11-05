@@ -6,6 +6,7 @@ import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungEnt
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterDto;
 import de.szut.lf8_projekt.testcontainers.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -57,7 +58,7 @@ public class MitarbeiterEntfernenIT extends AbstractIntegrationTest {
         mitarbeiter.setId(42L);
         mitarbeiter.setVorname("Max");
         mitarbeiter.setNachname("Mustermann");
-        when(mitarbeiterApiService.getMitarbeiterById(eq(42L), anyString())).thenReturn(mitarbeiter);
+        when(mitarbeiterApiService.getMitarbeiterById(eq(42L), nullable(String.class))).thenReturn(mitarbeiter);
 
         // Test durchführen
         this.mockMvc.perform(delete("/LF08Projekt/" + projekt.getId() + "/mitarbeiter/42")
@@ -94,7 +95,7 @@ public class MitarbeiterEntfernenIT extends AbstractIntegrationTest {
         projekt = projektRepository.save(projekt);
 
         // Mock: Mitarbeiter existiert nicht
-        when(mitarbeiterApiService.getMitarbeiterById(999L, anyString())).thenReturn(null);
+        when(mitarbeiterApiService.getMitarbeiterById(ArgumentMatchers.any(Long.class), nullable(String.class))).thenReturn(null);
 
         this.mockMvc.perform(delete("/LF08Projekt/" + projekt.getId() + "/mitarbeiter/999")
                         .with(csrf()))
@@ -118,7 +119,7 @@ public class MitarbeiterEntfernenIT extends AbstractIntegrationTest {
         mitarbeiter.setId(42L);
         mitarbeiter.setVorname("Max");
         mitarbeiter.setNachname("Mustermann");
-        when(mitarbeiterApiService.getMitarbeiterById(42L, anyString())).thenReturn(mitarbeiter);
+        when(mitarbeiterApiService.getMitarbeiterById(any(Long.class), nullable(String.class))).thenReturn(mitarbeiter);
 
         // Keine Zuordnung erstellt!
 

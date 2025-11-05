@@ -8,6 +8,7 @@ import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungEnt
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterDto;
 import de.szut.lf8_projekt.testcontainers.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -18,6 +19,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -97,7 +99,7 @@ public class ProjektInformationenAbrufenIT extends AbstractIntegrationTest {
         javaSkill.setId(1L);
         javaSkill.setSkill("Java");
         mitarbeiter.setSkillSet(Arrays.asList(javaSkill));
-        when(mitarbeiterApiService.getMitarbeiterById(42L, anyString())).thenReturn(mitarbeiter);
+        when(mitarbeiterApiService.getMitarbeiterById(ArgumentMatchers.any(Long.class), nullable(String.class))).thenReturn(mitarbeiter);
 
         // Test
         this.mockMvc.perform(get("/LF08Projekt/Projekt/" + projekt.getId()))
@@ -144,7 +146,7 @@ public class ProjektInformationenAbrufenIT extends AbstractIntegrationTest {
         javaSkill.setId(1L);
         javaSkill.setSkill("Java");
         mitarbeiter1.setSkillSet(Arrays.asList(javaSkill));
-        when(mitarbeiterApiService.getMitarbeiterById(42L, anyString())).thenReturn(mitarbeiter1);
+        when(mitarbeiterApiService.getMitarbeiterById(ArgumentMatchers.eq(42L), nullable(String.class))).thenReturn(mitarbeiter1);
 
         // Mock Mitarbeiter 2
         MitarbeiterDto mitarbeiter2 = new MitarbeiterDto();
@@ -155,7 +157,7 @@ public class ProjektInformationenAbrufenIT extends AbstractIntegrationTest {
         reactSkill.setId(2L);
         reactSkill.setSkill("React");
         mitarbeiter2.setSkillSet(Arrays.asList(reactSkill));
-        when(mitarbeiterApiService.getMitarbeiterById(43L, anyString())).thenReturn(mitarbeiter2);
+        when(mitarbeiterApiService.getMitarbeiterById(ArgumentMatchers.eq(43L), nullable(String.class))).thenReturn(mitarbeiter2);
 
         // Test
         this.mockMvc.perform(get("/LF08Projekt/Projekt/" + projekt.getId() + "/Mitarbeiter"))

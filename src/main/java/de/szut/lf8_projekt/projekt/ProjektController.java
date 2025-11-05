@@ -132,10 +132,6 @@ public class ProjektController {
         String securityToken = jwt != null ? jwt.getTokenValue() : null;
         boolean qualifikationInProjekt = false;
         ProjektEntity projekt = this.projektService.readById(projekt_id);
-        if (!this.validationService.validateMitarbeiterId(mitarbeiter_id, securityToken)) {
-            throw new ResourceNotFoundException("Der Mitarbeiter mit der ID " + mitarbeiter_id + " existiert nicht!");
-        }
-
         MitarbeiterDto mitarbeiterDto = this.mitarbeiterApiService.getMitarbeiterById(mitarbeiter_id, securityToken);
 
         if (mitarbeiterDto == null) {
