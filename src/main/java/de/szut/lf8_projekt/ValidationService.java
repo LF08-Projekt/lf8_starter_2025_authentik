@@ -13,18 +13,42 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Service-Klasse für die Validierung von Daten gegen die externe Employee-API.
+ * Prüft die Existenz von Mitarbeitern, Qualifikationen und Kunden.
+ */
 @Service
 public class ValidationService {
     private final RestTemplate restTemplate;
 
+    /**
+     * Konstruktor für den ValidationService.
+     * Initialisiert das RestTemplate für API-Aufrufe.
+     */
     public ValidationService() {
         restTemplate = new RestTemplate();
     }
 
+    /**
+     * Validiert eine Projekt-ID (noch nicht implementiert).
+     *
+     * @param id Die zu validierende Projekt-ID
+     * @param securityToken Das Security-Token für die API-Authentifizierung
+     * @return true wenn das Projekt existiert
+     * @throws NotImplementedException da noch nicht implementiert
+     */
     public Boolean validateProjektId(Long id, String securityToken) {
         throw new NotImplementedException();
     }
 
+    /**
+     * Validiert eine Mitarbeiter-ID über die externe Employee-API.
+     * Prüft ob ein Mitarbeiter mit der gegebenen ID existiert.
+     *
+     * @param id Die zu validierende Mitarbeiter-ID
+     * @param securityToken Das Security-Token für die API-Authentifizierung
+     * @return true wenn der Mitarbeiter existiert, false bei Fehler oder wenn nicht gefunden
+     */
     public Boolean validateMitarbeiterId(Long id, String securityToken) {
         try {
             String url = "https://employee-api.szut.dev/employees/" + id;
@@ -42,6 +66,16 @@ public class ValidationService {
             return false;
         }
     }
+
+    /**
+     * Validiert eine Liste von Qualifikationen über die externe Employee-API.
+     * Prüft ob alle angegebenen Qualifikationen im System existieren.
+     *
+     * @param qualifications Liste der zu validierenden Qualifikationsbezeichnungen
+     * @param securityToken Das Security-Token für die API-Authentifizierung
+     * @return true wenn alle Qualifikationen existieren, false bei Fehler
+     * @throws ResourceNotFoundException wenn eine Qualifikation nicht existiert
+     */
     public Boolean validateQualifications(List<String> qualifications, String securityToken) {
         try {
             String url = "https://employee-api.szut.dev/qualifications";
@@ -71,6 +105,14 @@ public class ValidationService {
         }
     }
 
+    /**
+     * Validiert eine Kunden-ID.
+     * Aktuell wird immer true zurückgegeben (Platzhalter-Implementierung).
+     *
+     * @param id Die zu validierende Kunden-ID
+     * @param securityToken Das Security-Token für die API-Authentifizierung
+     * @return immer true
+     */
     public Boolean validateKundenId(Long id, String securityToken) {
         return true;
     }
