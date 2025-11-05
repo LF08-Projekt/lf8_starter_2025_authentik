@@ -153,7 +153,7 @@ public class ProjektService {
     public ProjektMitarbeiterGetDto holeProjektMitarbeiter(Long projektId) {
         ProjektEntity projekt = readById(projektId);
 
-        List<MitarbeiterZuordnungEntity> zuordnungen = mitarbeiterZuordnungRepository.findAllByProjektId(projektId);
+        List<MitarbeiterZuordnungEntity> zuordnungen = mitarbeiterZuordnungRepository.getMitarbeiterZuordnungEntitiesByProjektId(projektId);
         List<MitarbeiterImProjektDto> mitarbeiter = new ArrayList<>();
 
         for (MitarbeiterZuordnungEntity zuordnung : zuordnungen) {
@@ -187,7 +187,7 @@ public class ProjektService {
      * @return Liste der Qualifikationen die geplant sind aber von keinem Mitarbeiter erfüllt werden
      */
     private List<String> berechneFehlendeQualifikationen(Long projektId, List<String> geplanteQualifikationen) {
-        List<MitarbeiterZuordnungEntity> zuordnungen = mitarbeiterZuordnungRepository.findAllByProjektId(projektId);
+        List<MitarbeiterZuordnungEntity> zuordnungen = mitarbeiterZuordnungRepository.getMitarbeiterZuordnungEntitiesByProjektId(projektId);
         List<String> vorhandeneQualifikationen = new ArrayList<>();
 
         for (MitarbeiterZuordnungEntity zuordnung : zuordnungen) {
