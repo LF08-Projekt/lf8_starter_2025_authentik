@@ -30,11 +30,11 @@ public class ProjektService {
     private final MitarbeiterZuordnungRepository mitarbeiterZuordnungRepository;
     private final MitarbeiterApiService mitarbeiterApiService;
 
-    public ProjektService(ProjektRepository repository, ProjektMappingService projektMappingService) {
     public ProjektService(ProjektRepository repository,
                           GeplanteQualifikationRepository geplanteQualifikationRepository,
                           MitarbeiterZuordnungRepository mitarbeiterZuordnungRepository,
-                          MitarbeiterApiService mitarbeiterApiService) {
+                          MitarbeiterApiService mitarbeiterApiService,
+                          ProjektMappingService projektMappingService) {
         this.repository = repository;
         this.projektMappingService = projektMappingService;
         this.geplanteQualifikationRepository = geplanteQualifikationRepository;

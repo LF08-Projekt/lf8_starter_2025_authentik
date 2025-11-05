@@ -15,7 +15,6 @@ import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterDto;
 import de.szut.lf8_projekt.projekt.dto.ProjektGetDto;
 import de.szut.lf8_projekt.projekt.dto.ProjektLoeschenResponseDto;
 import de.szut.lf8_projekt.projekt.dto.ProjektMitarbeiterGetDto;
-import de.szut.lf8_starter.hello.dto.HelloGetDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

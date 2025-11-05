@@ -16,6 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -37,8 +38,8 @@ public class ReadAllProjektsIT extends AbstractIntegrationTest {
         projekt.setBezeichnung("Testprojekt " + name);
         projekt.setVerantwortlicherId(1L);
         projekt.setKundenId(123L);
-        projekt.setStartdatum(new Date());
-        projekt.setGeplantesEnddatum(new Date(2026, Calendar.DECEMBER,23));
+        projekt.setStartdatum(LocalDateTime.now());
+        projekt.setGeplantesEnddatum(LocalDateTime.of(2026, 12, 23, 0, 0));
         projekt = projektRepository.save(projekt);
         GeplanteQualifikationEntity geplanteQualifikation = new GeplanteQualifikationEntity();
         geplanteQualifikation.setQualifikationId(1L);
@@ -69,11 +70,11 @@ public class ReadAllProjektsIT extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id", is(1)))
+                .andExpect(jsonPath("$[0].id", is(projekt1.getId().intValue())))
                 .andExpect(jsonPath("$[0].bezeichnung", is("Testprojekt 1")))
                 .andExpect(jsonPath("$[0].verantwortlicherId", is(1)))
                 .andExpect(jsonPath("$[0].kundenId", is(123)))
-                .andExpect(jsonPath("$[1].id", is(2)))
+                .andExpect(jsonPath("$[1].id", is(projekt2.getId().intValue())))
                 .andExpect(jsonPath("$[1].bezeichnung", is("Testprojekt 2")))
                 .andExpect(jsonPath("$[1].verantwortlicherId", is(1)))
                 .andExpect(jsonPath("$[1].kundenId", is(123)));
