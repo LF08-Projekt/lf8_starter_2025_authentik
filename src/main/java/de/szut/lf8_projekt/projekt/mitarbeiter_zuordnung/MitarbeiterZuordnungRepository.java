@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface MitarbeiterZuordnungRepository extends JpaRepository<MitarbeiterZuordnungEntity, Long> {
     Optional<MitarbeiterZuordnungEntity> findByProjektIdAndMitarbeiterId(Long projektId, Long mitarbeiterId);
     Optional<List<MitarbeiterZuordnungEntity>> findAllByMitarbeiterId(Long mitarbeiterId);
+    List<MitarbeiterZuordnungEntity> findAllByProjektId(Long projektId);
 }

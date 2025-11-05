@@ -12,6 +12,11 @@ import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungEnt
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungService;
 
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterDto;
+import de.szut.lf8_projekt.projekt.dto.ProjektGetDto;
+import de.szut.lf8_projekt.projekt.dto.ProjektLoeschenResponseDto;
+import de.szut.lf8_projekt.projekt.dto.ProjektMitarbeiterGetDto;
+import de.szut.lf8_starter.hello.dto.HelloGetDto;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,16 +71,27 @@ public class ProjektController {
         this.mitarbeiterMappingService = mitarbeiterMappingService;
     }
 
+    @Operation(summary = "Legt ein neues Projekt an")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Das Projekt wurde erfolgreich angelegt",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProjektCreateConfirmationDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Fehlende Pflichtangabe im DTO", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Der verantwortliche Mitarbeiter, Kunde oder" +
+                    " eine der geplanten Qualifikationen konnte nicht gefunden werden", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
+    })
     @PostMapping(path="/Projekt")
+    @ResponseStatus(HttpStatus.CREATED)
     public ProjektCreateConfirmationDto create(@RequestBody @Valid ProjektCreateDto dto, @AuthenticationPrincipal Jwt jwt) {
-        String securityTocken = jwt.getTokenValue();
-        if (!this.validationService.validateMitarbeiterId(dto.getVerantwortlicherId(), securityTocken)) {
+        String securityToken = jwt != null ? jwt.getTokenValue() : null;
+        if (!this.validationService.validateMitarbeiterId(dto.getVerantwortlicherId(), securityToken)) {
             throw new ResourceNotFoundException("Mitarbeiter mit der ID " + dto.getVerantwortlicherId() + " existiert nicht!");
         }
-        if (!this.validationService.validateKundenId(dto.getKundenId(), securityTocken)) {
+        if (!this.validationService.validateKundenId(dto.getKundenId(), securityToken)) {
             throw new ResourceNotFoundException("Kunde mit der ID + " + dto.getKundenId() + " existiert nicht!");
         }
-        if (!this.validationService.validateQualifications(Arrays.asList(dto.getGeplanteQualifikationen()), securityTocken)) {
+        if (dto.getGeplanteQualifikationen() != null && !this.validationService.validateQualifications(Arrays.asList(dto.getGeplanteQualifikationen()), securityToken)) {
             throw new ResourceNotFoundException("Liste der geplanten Qualifikationen enthält eine ungültige Qualifikation");
         }
 
@@ -83,10 +99,12 @@ public class ProjektController {
         projektEntity = this.projektService.create(projektEntity);
 
         List<String> geplanteQualifikationen = new ArrayList<>();
-        for (String qualifikation : dto.getGeplanteQualifikationen()) {
-            GeplanteQualifikationEntity geplanteQualifikationEntity = this.projektMappingService.mapDataToGeplanteQualifikationEntity(projektEntity.getId(), qualifikation);
-            geplanteQualifikationEntity = this.geplanteQualifikationService.create(geplanteQualifikationEntity);
-            geplanteQualifikationen.add(geplanteQualifikationEntity.getQualifikation());
+        if (dto.getGeplanteQualifikationen() != null) {
+            for (String qualifikation : dto.getGeplanteQualifikationen()) {
+                GeplanteQualifikationEntity geplanteQualifikationEntity = this.projektMappingService.mapDataToGeplanteQualifikationEntity(projektEntity.getId(), qualifikation);
+                geplanteQualifikationEntity = this.geplanteQualifikationService.create(geplanteQualifikationEntity);
+                geplanteQualifikationen.add(geplanteQualifikationEntity.getQualifikation());
+            }
         }
 
         ProjektCreateConfirmationDto returnDto = this.projektMappingService.mapProjektEntityToProjektCreateConfirmationDto(projektEntity);
@@ -188,5 +206,59 @@ public class ProjektController {
             compactProjekts.add(projektCompactDto);
         }
         return new ResponseEntity<>(compactProjekts, HttpStatus.OK);
+    }
+
+    /**
+     * Holt alle Informationen über ein Projekt.
+     *
+     * @param id Die ID des Projekts
+     * @return Projektdetails inklusive geplanter und fehlender Qualifikationen
+     */
+    @Operation(summary = "Ruft alle Informationen über ein Projekt ab")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Projektdetails erfolgreich abgerufen"),
+        @ApiResponse(responseCode = "404", description = "Projekt nicht gefunden", content = @Content),
+        @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
+    })
+    @GetMapping(value = "/Projekt/{id}")
+    public ResponseEntity<ProjektGetDto> holeProjekt(@PathVariable Long id) {
+        ProjektGetDto projekt = projektService.holeProjektDetails(id);
+        return new ResponseEntity<>(projekt, HttpStatus.OK);
+    }
+
+    /**
+     * Holt alle Mitarbeiter eines Projekts mit ihren Qualifikationen.
+     *
+     * @param id Die ID des Projekts
+     * @return Liste aller Mitarbeiter im Projekt mit ID, Name und Qualifikationen
+     */
+    @Operation(summary = "Ruft alle Mitarbeiter eines Projekts mit ihren Qualifikationen ab")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Mitarbeiterliste erfolgreich abgerufen"),
+        @ApiResponse(responseCode = "404", description = "Projekt nicht gefunden", content = @Content),
+        @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
+    })
+    @GetMapping(value = "/Projekt/{id}/Mitarbeiter")
+    public ResponseEntity<ProjektMitarbeiterGetDto> holeProjektMitarbeiter(@PathVariable Long id) {
+        ProjektMitarbeiterGetDto mitarbeiter = projektService.holeProjektMitarbeiter(id);
+        return new ResponseEntity<>(mitarbeiter, HttpStatus.OK);
+    }
+
+    /**
+     * Löscht ein Projekt anhand der Projekt-ID.
+     *
+     * @param id Die ID des zu löschenden Projekts
+     * @return Alle Projektinformationen des gelöschten Projekts
+     */
+    @Operation(summary = "Löscht ein Projekt")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Projekt erfolgreich gelöscht"),
+        @ApiResponse(responseCode = "404", description = "Projekt nicht gefunden", content = @Content),
+        @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
+    })
+    @DeleteMapping(value = "/Projekt/{id}")
+    public ResponseEntity<ProjektLoeschenResponseDto> loescheProjekt(@PathVariable Long id) {
+        ProjektLoeschenResponseDto response = projektService.loescheProjekt(id);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
