@@ -64,3 +64,16 @@ Um einen JWT Token zu generieren, der für die Authentifizierung benötigt wird,
 
 # Projekt nach Id abrufen
 + Die noch fehlenden Qualifikationen werden mit ausgegeben (weil noch kein Mitarbeiter mit den entsprechenden Qualifikationen hinzugefügt wurde)
+```bash
+# Datenbank komplett zurücksetzen
+docker compose down
+docker volume rm lf8_starter_postgres_data
+docker compose up
+```
+
+### Tests schlagen fehl
+
+```bash
+# Cache leeren und neu bauen
+./gradlew clean build
+```
