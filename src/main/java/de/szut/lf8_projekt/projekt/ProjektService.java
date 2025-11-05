@@ -1,6 +1,7 @@
 package de.szut.lf8_projekt.projekt;
 
 import de.szut.lf8_projekt.exceptionHandling.ResourceNotFoundException;
+import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungEntity;
 import de.szut.lf8_projekt.projekt.dto.MitarbeiterImProjektDto;
 import de.szut.lf8_projekt.projekt.dto.ProjektGetDto;
 import de.szut.lf8_projekt.projekt.dto.ProjektLoeschenResponseDto;
@@ -13,6 +14,8 @@ import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungRep
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterDto;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +25,7 @@ import java.util.stream.Collectors;
 @Service
 public class ProjektService {
     private final ProjektRepository repository;
+    private final ProjektMappingService projektMappingService;
     private final GeplanteQualifikationRepository geplanteQualifikationRepository;
     private final MitarbeiterZuordnungRepository mitarbeiterZuordnungRepository;
     private final MitarbeiterApiService mitarbeiterApiService;
@@ -29,8 +33,10 @@ public class ProjektService {
     public ProjektService(ProjektRepository repository,
                           GeplanteQualifikationRepository geplanteQualifikationRepository,
                           MitarbeiterZuordnungRepository mitarbeiterZuordnungRepository,
-                          MitarbeiterApiService mitarbeiterApiService) {
+                          MitarbeiterApiService mitarbeiterApiService,
+                          ProjektMappingService projektMappingService) {
         this.repository = repository;
+        this.projektMappingService = projektMappingService;
         this.geplanteQualifikationRepository = geplanteQualifikationRepository;
         this.mitarbeiterZuordnungRepository = mitarbeiterZuordnungRepository;
         this.mitarbeiterApiService = mitarbeiterApiService;
@@ -88,6 +94,19 @@ public class ProjektService {
     public List<ProjektEntity> readByDate(LocalDateTime startdatum, LocalDateTime endDatum) {
         return this.repository.findAllByStartdatumIsBetweenOrGeplantesEnddatumIsBetween(startdatum, endDatum, startdatum, endDatum);
     }
+
+    public List<ProjektCompactDto> readByMitarbeiterId(List<MitarbeiterZuordnungEntity> mitarbeiterZuordnungen) {
+        List<ProjektCompactDto> projekts = new ArrayList<>();
+        for(MitarbeiterZuordnungEntity mitarbeiterZuordnung: mitarbeiterZuordnungen) {
+            Optional<ProjektEntity> projekt = this.repository.findById(mitarbeiterZuordnung.getProjektId());
+            if (projekt.isPresent()) {
+                ProjektCompactDto projektCompactDto = this.projektMappingService.mapProjektEntityToProjektByMitarbeiterDto(projekt.get());
+                projekts.add(projektCompactDto);
+            }
+        }
+        return projekts;
+    }
+
 
     /**
      * Holt alle Details eines Projekts inklusive der fehlenden Qualifikationen.

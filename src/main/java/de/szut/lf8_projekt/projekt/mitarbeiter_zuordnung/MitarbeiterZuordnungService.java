@@ -9,6 +9,7 @@ import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterEntferne
 import de.szut.lf8_projekt.exceptionHandling.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -139,6 +140,14 @@ public class MitarbeiterZuordnungService {
             }
         }
         return true;
+    }
+
+    public List<MitarbeiterZuordnungEntity> getAllProjektsFromMitarbeiter(Long mitarbeiterId) {
+        Optional<List<MitarbeiterZuordnungEntity>> mitarbeiterZuordnungen = this.repository.findAllByMitarbeiterId(mitarbeiterId);
+        if(mitarbeiterZuordnungen.isEmpty()) {
+            throw new ResourceNotFoundException("Es wurden keine Projekte mit der Mitarbeiter Id" + mitarbeiterId + " gefundne");
+        }
+        return mitarbeiterZuordnungen.get();
     }
 
 }

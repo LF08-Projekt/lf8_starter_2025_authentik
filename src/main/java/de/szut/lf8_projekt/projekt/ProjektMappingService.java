@@ -34,6 +34,15 @@ public class ProjektMappingService {
         dto.setGeplantesEnddatum(entity.getGeplantesEnddatum());
         return dto;
     }
+
+    public ProjektCompactDto mapProjektEntityToProjektByMitarbeiterDto(ProjektEntity projektEntity) {
+        ProjektCompactDto projektCompactDto = new ProjektCompactDto();
+        projektCompactDto.setBezeichnung(projektEntity.getBezeichnung());
+        projektCompactDto.setId(projektEntity.getId());
+        projektCompactDto.setKundenId(projektEntity.getKundenId());
+        projektCompactDto.setVerantwortlicherId(projektEntity.getVerantwortlicherId());
+        return projektCompactDto;
+    }
     public ProjektUpdateConfirmationDto mapProjektEntityToProjektUpdateConfirmationDto(ProjektEntity entity) {
         ProjektUpdateConfirmationDto dto = new ProjektUpdateConfirmationDto();
         dto.setId(entity.getId());

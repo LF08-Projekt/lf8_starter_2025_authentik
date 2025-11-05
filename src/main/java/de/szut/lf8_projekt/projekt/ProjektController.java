@@ -42,11 +42,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.validation.constraints.Min;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -251,6 +247,34 @@ public class ProjektController {
 
         MitarbeiterEntfernenResponseDto response = mitarbeiterZuordnungService.entferneMitarbeiterAusProjekt(projektId, mitarbeiterId);
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Projekte anhand eines Mitarbeiters finden")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Projekte werden erfolgreich zurück gegeben"),
+            @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
+    })
+    @RequestMapping("/Mitarbeiter/{mitarbeiterId}/Projekt")
+    public ResponseEntity<Object> ReadProjektsByMitarbeiterId(@PathVariable final Long mitarbeiterId) {
+        List<MitarbeiterZuordnungEntity> mitarbeiterZuordnungen = this.mitarbeiterZuordnungService.getAllProjektsFromMitarbeiter(mitarbeiterId);
+        List<ProjektCompactDto> projekts = this.projektService.readByMitarbeiterId(mitarbeiterZuordnungen);
+        return new ResponseEntity<>(projekts, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Alle Projekt mit id, bezeichnung, verantwortlicherId und kundenId ausgeben.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Projekte werden erfolgreich zurück gegeben"),
+            @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
+    })
+    @RequestMapping("/Projekt")
+    public ResponseEntity<Object> ReadAllProjekts() {
+        List<ProjektEntity> projekts = this.projektService.readAll();
+        List<ProjektCompactDto> compactProjekts = new ArrayList<>();
+        for(ProjektEntity projekt: projekts) {
+            ProjektCompactDto projektCompactDto = this.projektMappingService.mapProjektEntityToProjektByMitarbeiterDto(projekt);
+            compactProjekts.add(projektCompactDto);
+        }
+        return new ResponseEntity<>(compactProjekts, HttpStatus.OK);
     }
 
     /**
