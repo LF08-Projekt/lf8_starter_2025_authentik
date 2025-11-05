@@ -1,5 +1,6 @@
 package de.szut.lf8_projekt.projekt;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,13 +12,17 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
+@Schema(description = "Kompaktes DTO mit den wichtigsten Projektinformationen für Listenansichten")
 public class ProjektCompactDto {
-    /** Eindeutige ID des Projekts */
+    @Schema(description = "Eindeutige ID des Projekts", example = "1")
     private Long id;
-    /** Bezeichnung/Name des Projekts */
+
+    @Schema(description = "Bezeichnung/Name des Projekts", example = "LF08_Projekt")
     private String bezeichnung;
-    /** ID des verantwortlichen Mitarbeiters */
+
+    @Schema(description = "ID des verantwortlichen Mitarbeiters", example = "42")
     private Long verantwortlicherId;
-    /** ID des Kunden */
+
+    @Schema(description = "ID des Kunden", example = "12345")
     private Long kundenId;
 }

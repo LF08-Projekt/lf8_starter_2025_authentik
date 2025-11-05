@@ -1,22 +1,24 @@
 package de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
  * DTO für die Zuordnung eines Mitarbeiters zu einem Projekt.
  */
 @Data
+@Schema(description = "DTO für die Zuordnung eines Mitarbeiters zu einem Projekt mit einer Qualifikation")
 public class MitarbeiterZuordnungDto {
 
-    /** Eindeutige ID der Zuordnung */
+    @Schema(description = "Eindeutige ID der Zuordnung", example = "1")
     private Long id;
 
-    /** ID des Projekts */
+    @Schema(description = "ID des Projekts", example = "1")
     private Long projektId;
 
-    /** ID des Mitarbeiters */
+    @Schema(description = "ID des Mitarbeiters", example = "42")
     private Long mitarbeiterId;
 
-    /** ID der Qualifikation */
+    @Schema(description = "ID der Qualifikation", example = "5")
     private Long qualifikationId;
 }

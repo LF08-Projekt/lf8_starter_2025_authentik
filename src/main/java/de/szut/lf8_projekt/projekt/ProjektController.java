@@ -42,6 +42,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
@@ -56,6 +58,7 @@ import java.util.List;
 @RestController
 @RequestMapping(value="/LF08Projekt")
 @Validated
+@Tag(name = "Projekt-Verwaltung", description = "Verwaltung von Projekten, Mitarbeiterzuordnungen und Qualifikationen")
 public class ProjektController {
     private final MitarbeiterMappingService mitarbeiterMappingService;
     private final MitarbeiterApiService mitarbeiterApiService;
@@ -163,8 +166,10 @@ public class ProjektController {
             @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
     })
     @PostMapping("{projekt_id}/mitarbeiter/{mitarbeiter_id}")
-    public ResponseEntity<Object> addMitarbeiterToProjekt(@PathVariable final Long projekt_id, @PathVariable final Long mitarbeiter_id,
-                                                                     @Valid @RequestBody final SkillDto skill) {
+    public ResponseEntity<Object> addMitarbeiterToProjekt(
+            @Parameter(description = "ID des Projekts", example = "1") @PathVariable final Long projekt_id,
+            @Parameter(description = "ID des Mitarbeiters", example = "42") @PathVariable final Long mitarbeiter_id,
+            @Valid @RequestBody final SkillDto skill) {
         boolean qualifikationInProjekt = false;
         ProjektEntity projekt = this.projektService.readById(projekt_id);
         MitarbeiterDto mitarbeiterDto = this.mitarbeiterApiService.getMitarbeiterById(mitarbeiter_id);
@@ -219,10 +224,22 @@ public class ProjektController {
      * @throws ResourceNotFoundException wenn Projekt, Mitarbeiter, Kunde oder Qualifikationen nicht gefunden werden
      * @throws ResourceConflictException wenn Mitarbeiter im neuen Zeitraum bereits verplant sind
      */
+    @Operation(summary = "Aktualisiert ein bestehendes Projekt")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Das Projekt wurde erfolgreich aktualisiert",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProjektUpdateConfirmationDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Fehlende Pflichtangabe im DTO", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Projekt, verantwortlicher Mitarbeiter, Kunde oder " +
+                    "eine der geplanten Qualifikationen konnte nicht gefunden werden", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Konflikt: Mitarbeiter bereits im neuen Zeitraum verplant", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
+    })
     @PutMapping(path="/Projekt/{projektId}")
-    public ProjektUpdateConfirmationDto updateProjekt(@RequestBody @Valid ProjektUpdateDto dto,
-                                                      @PathVariable Long projektId,
-                                                      @AuthenticationPrincipal Jwt jwt) {
+    public ProjektUpdateConfirmationDto updateProjekt(
+            @RequestBody @Valid ProjektUpdateDto dto,
+            @Parameter(description = "ID des zu aktualisierenden Projekts", example = "1") @PathVariable Long projektId,
+            @AuthenticationPrincipal Jwt jwt) {
         ProjektEntity previousSaveState = this.projektService.readById(projektId);
         if (previousSaveState == null) {
             throw new ResourceNotFoundException("Projekt mit der ID " + projektId + " existiert nicht");
@@ -292,14 +309,16 @@ public class ProjektController {
      */
     @Operation(summary = "Entfernt einen Mitarbeiter aus einem Projekt")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Mitarbeiter erfolgreich aus Projekt entfernt"),
+        @ApiResponse(responseCode = "200", description = "Mitarbeiter erfolgreich aus Projekt entfernt",
+                content = {@Content(mediaType = "application/json",
+                        schema = @Schema(implementation = MitarbeiterEntfernenResponseDto.class))}),
         @ApiResponse(responseCode = "404", description = "Projekt, Mitarbeiter oder Zuordnung nicht gefunden", content = @Content),
         @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
     })
     @RequestMapping(value = "/{projektId}/mitarbeiter/{mitarbeiterId}", method = RequestMethod.DELETE)
     public ResponseEntity<MitarbeiterEntfernenResponseDto> entferneMitarbeiterAusProjekt(
-            @PathVariable Long projektId,
-            @PathVariable Long mitarbeiterId) {
+            @Parameter(description = "ID des Projekts", example = "1") @PathVariable Long projektId,
+            @Parameter(description = "ID des Mitarbeiters", example = "42") @PathVariable Long mitarbeiterId) {
 
         MitarbeiterEntfernenResponseDto response = mitarbeiterZuordnungService.entferneMitarbeiterAusProjekt(projektId, mitarbeiterId);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -313,11 +332,14 @@ public class ProjektController {
      */
     @Operation(summary = "Projekte anhand eines Mitarbeiters finden")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Projekte werden erfolgreich zurück gegeben"),
+            @ApiResponse(responseCode = "200", description = "Projekte werden erfolgreich zurück gegeben",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProjektCompactDto.class))}),
             @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
     })
     @RequestMapping("/Mitarbeiter/{mitarbeiterId}/Projekt")
-    public ResponseEntity<Object> ReadProjektsByMitarbeiterId(@PathVariable final Long mitarbeiterId) {
+    public ResponseEntity<Object> ReadProjektsByMitarbeiterId(
+            @Parameter(description = "ID des Mitarbeiters", example = "42") @PathVariable final Long mitarbeiterId) {
         List<MitarbeiterZuordnungEntity> mitarbeiterZuordnungen = this.mitarbeiterZuordnungService.getAllProjektsFromMitarbeiter(mitarbeiterId);
         List<ProjektCompactDto> projekts = this.projektService.readByMitarbeiterId(mitarbeiterZuordnungen);
         return new ResponseEntity<>(projekts, HttpStatus.OK);
@@ -331,7 +353,9 @@ public class ProjektController {
      */
     @Operation(summary = "Alle Projekt mit id, bezeichnung, verantwortlicherId und kundenId ausgeben.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Projekte werden erfolgreich zurück gegeben"),
+            @ApiResponse(responseCode = "200", description = "Projekte werden erfolgreich zurück gegeben",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProjektCompactDto.class))}),
             @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
     })
     @RequestMapping("/Projekt")
@@ -353,12 +377,15 @@ public class ProjektController {
      */
     @Operation(summary = "Ruft alle Informationen über ein Projekt ab")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Projektdetails erfolgreich abgerufen"),
+        @ApiResponse(responseCode = "200", description = "Projektdetails erfolgreich abgerufen",
+                content = {@Content(mediaType = "application/json",
+                        schema = @Schema(implementation = ProjektGetDto.class))}),
         @ApiResponse(responseCode = "404", description = "Projekt nicht gefunden", content = @Content),
         @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
     })
     @GetMapping(value = "/Projekt/{id}")
-    public ResponseEntity<ProjektGetDto> holeProjekt(@PathVariable Long id) {
+    public ResponseEntity<ProjektGetDto> holeProjekt(
+            @Parameter(description = "ID des Projekts", example = "1") @PathVariable Long id) {
         ProjektGetDto projekt = projektService.holeProjektDetails(id);
         return new ResponseEntity<>(projekt, HttpStatus.OK);
     }
@@ -371,12 +398,15 @@ public class ProjektController {
      */
     @Operation(summary = "Ruft alle Mitarbeiter eines Projekts mit ihren Qualifikationen ab")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Mitarbeiterliste erfolgreich abgerufen"),
+        @ApiResponse(responseCode = "200", description = "Mitarbeiterliste erfolgreich abgerufen",
+                content = {@Content(mediaType = "application/json",
+                        schema = @Schema(implementation = ProjektMitarbeiterGetDto.class))}),
         @ApiResponse(responseCode = "404", description = "Projekt nicht gefunden", content = @Content),
         @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
     })
     @GetMapping(value = "/Projekt/{id}/Mitarbeiter")
-    public ResponseEntity<ProjektMitarbeiterGetDto> holeProjektMitarbeiter(@PathVariable Long id) {
+    public ResponseEntity<ProjektMitarbeiterGetDto> holeProjektMitarbeiter(
+            @Parameter(description = "ID des Projekts", example = "1") @PathVariable Long id) {
         ProjektMitarbeiterGetDto mitarbeiter = projektService.holeProjektMitarbeiter(id);
         return new ResponseEntity<>(mitarbeiter, HttpStatus.OK);
     }
@@ -389,12 +419,15 @@ public class ProjektController {
      */
     @Operation(summary = "Löscht ein Projekt")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Projekt erfolgreich gelöscht"),
+        @ApiResponse(responseCode = "200", description = "Projekt erfolgreich gelöscht",
+                content = {@Content(mediaType = "application/json",
+                        schema = @Schema(implementation = ProjektLoeschenResponseDto.class))}),
         @ApiResponse(responseCode = "404", description = "Projekt nicht gefunden", content = @Content),
         @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
     })
     @DeleteMapping(value = "/Projekt/{id}")
-    public ResponseEntity<ProjektLoeschenResponseDto> loescheProjekt(@PathVariable Long id) {
+    public ResponseEntity<ProjektLoeschenResponseDto> loescheProjekt(
+            @Parameter(description = "ID des zu löschenden Projekts", example = "1") @PathVariable Long id) {
         ProjektLoeschenResponseDto response = projektService.loescheProjekt(id);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
