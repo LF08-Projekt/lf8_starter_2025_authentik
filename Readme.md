@@ -163,15 +163,6 @@ Die Anwendung integriert eine externe Mitarbeiter-API:
 - **Authentifizierung**: JWT Bearer Token (von Authentik)
 - Beispielanfragen in [SampleRequests.http](SampleRequests.http)
 
-# Projekt anlegen
-- Bei fehlenden Feldern kriege ich bei Postman keinen 400-Anwort, sondern das Feld wird einfach als null angelegt. 
-    Bei den Unittests wird jedoch wie erwartet eine 400-Antwort gesendet. Ich weiß nicht, woran das liegt.
-
-# Projekt bearbeiten
-+ Wenn das geplante Enddatum eines Projekts 
-
-# Projekt nach Id abrufen
-+ Die noch fehlenden Qualifikationen werden mit ausgegeben (weil noch kein Mitarbeiter mit den entsprechenden Qualifikationen hinzugefügt wurde)
 ## Troubleshooting
 
 ### Port 8080 bereits belegt
@@ -199,3 +190,15 @@ docker compose up
 # Cache leeren und neu bauen
 ./gradlew clean build
 ```
+# Projekt anlegen
+- Bei fehlenden Feldern kriege ich bei Postman keinen 400-Anwort, sondern das Feld wird einfach als null angelegt.
+  Bei den Unittests wird jedoch wie erwartet eine 400-Antwort gesendet. Ich weiß nicht, woran das liegt.
++ Es wird geprüft, ob das geplante Enddatum auch nach dem Startdatum ist (+ Unittest dazu); Hatten wir nicht in die Anforderungen geschrieben
+
+# Projekt bearbeiten
++ Wenn das geplante Enddatum eines Projekts geändert wird und einer der im Projekt eingeplanten Mitarbeiter zu diesem Zeitpunkt bereits in einem
+  anderen Projekt eingeplant ist, dann wird eine 409 (Conflict)-Response zurückgegeben, mit entsprechender Nachricht
++ Es wird geprüft, ob das geplante/wirkliche Enddatum auch nach dem Startdatum ist (+ Unittest dazu)
+
+# Projekt nach Id abrufen
++ Die noch fehlenden Qualifikationen werden mit ausgegeben (weil noch kein Mitarbeiter mit den entsprechenden Qualifikationen hinzugefügt wurde)
