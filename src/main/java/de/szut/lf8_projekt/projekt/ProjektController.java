@@ -6,9 +6,6 @@ import de.szut.lf8_projekt.ValidationService;
 import de.szut.lf8_projekt.exceptionHandling.ResourceConflictException;
 import de.szut.lf8_projekt.exceptionHandling.ResourceNotFoundException;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationEntity;
-import de.szut.lf8_projekt.ValidationService;
-import de.szut.lf8_projekt.exceptionHandling.ResourceConflictException;
-import de.szut.lf8_projekt.exceptionHandling.ResourceNotFoundException;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationService;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterApiService;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungDto;
@@ -48,8 +45,6 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
 
 /**
  * REST-Controller für die Verwaltung von Projekten.
