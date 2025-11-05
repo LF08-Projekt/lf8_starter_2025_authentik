@@ -26,10 +26,6 @@ public class GeplanteQualifikationService {
         return optionalGeplanteQualifikation.orElse(null);
     }
 
-    public List<GeplanteQualifikationEntity> readByProjektId(Long projektId) {
-        return this.repository.getGeplanteQualifikationEntitiesByProjektId(projektId);
-    }
-
     public void delete(GeplanteQualifikationEntity entity) {
         this.repository.delete(entity);
     }
