@@ -191,8 +191,6 @@ docker compose up
 ./gradlew clean build
 ```
 # Projekt anlegen
-- Bei fehlenden Feldern kriege ich bei Postman keinen 400-Anwort, sondern das Feld wird einfach als null angelegt.
-  Bei den Unittests wird jedoch wie erwartet eine 400-Antwort gesendet. Ich weiß nicht, woran das liegt.
 + Es wird geprüft, ob das geplante Enddatum auch nach dem Startdatum ist (+ Unittest dazu); Hatten wir nicht in die Anforderungen geschrieben
 
 # Projekt bearbeiten

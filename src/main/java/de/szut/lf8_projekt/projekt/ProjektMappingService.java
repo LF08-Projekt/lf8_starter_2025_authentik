@@ -31,13 +31,13 @@ public class ProjektMappingService {
      * Erstellt ein GeplanteQualifikationEntity aus Projekt-ID und Qualifikationsbezeichnung.
      *
      * @param projektId Die ID des Projekts
-     * @param qualifikation Die Bezeichnung der Qualifikation
+     * @param qualifikationId Die ID der Qualifikation
      * @return Ein neues GeplanteQualifikationEntity
      */
-    public GeplanteQualifikationEntity mapDataToGeplanteQualifikationEntity(Long projektId, String qualifikation) {
+    public GeplanteQualifikationEntity mapDataToGeplanteQualifikationEntity(Long projektId, Long qualifikationId) {
         GeplanteQualifikationEntity entity = new GeplanteQualifikationEntity();
         entity.setProjektId(projektId);
-        entity.setQualifikation(qualifikation);
+        entity.setQualifikationId(qualifikationId);
         return entity;
     }
 
