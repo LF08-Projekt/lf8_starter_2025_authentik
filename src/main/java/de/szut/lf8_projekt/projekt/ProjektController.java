@@ -49,6 +49,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * REST-Controller für die Verwaltung von Projekten.
+ * Bietet Endpunkte für CRUD-Operationen auf Projekten sowie für die Verwaltung von Mitarbeiterzuordnungen.
+ */
 @RestController
 @RequestMapping(value="/LF08Projekt")
 @Validated
@@ -61,6 +65,17 @@ public class ProjektController {
     private final ProjektMappingService projektMappingService;
     private final ValidationService validationService;
 
+    /**
+     * Konstruktor für den ProjektController.
+     *
+     * @param projektService Service für Projekt-Operationen
+     * @param geplanteQualifikationService Service für geplante Qualifikationen
+     * @param mitarbeiterZuordnungService Service für Mitarbeiterzuordnungen
+     * @param projektMappingService Service für Projekt-Mappings
+     * @param validationService Service für Validierungen
+     * @param mitarbeiterMappingService Service für Mitarbeiter-Mappings
+     * @param mitarbeiterApiService Service für externe Mitarbeiter-API-Aufrufe
+     */
     public ProjektController(ProjektService projektService,
                              GeplanteQualifikationService geplanteQualifikationService,
                              MitarbeiterZuordnungService mitarbeiterZuordnungService,
@@ -77,6 +92,16 @@ public class ProjektController {
         this.mitarbeiterMappingService = mitarbeiterMappingService;
     }
 
+    /**
+     * Legt ein neues Projekt an.
+     * Validiert den verantwortlichen Mitarbeiter, Kunden und die geplanten Qualifikationen
+     * über die externe API bevor das Projekt erstellt wird.
+     *
+     * @param dto Das DTO mit den Projektdaten
+     * @param jwt Das JWT-Token für die Authentifizierung
+     * @return Bestätigung mit den angelegten Projektdaten
+     * @throws ResourceNotFoundException wenn Mitarbeiter, Kunde oder Qualifikationen nicht gefunden werden
+     */
     @Operation(summary = "Legt ein neues Projekt an")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Das Projekt wurde erfolgreich angelegt",
@@ -118,6 +143,18 @@ public class ProjektController {
         return returnDto;
     }
 
+    /**
+     * Fügt einen Mitarbeiter zu einem Projekt hinzu.
+     * Validiert, dass die Qualifikation im Projekt benötigt wird, der Mitarbeiter diese besitzt
+     * und im Projektzeitraum verfügbar ist.
+     *
+     * @param projekt_id Die ID des Projekts
+     * @param mitarbeiter_id Die ID des Mitarbeiters
+     * @param skill Die Qualifikation, mit der der Mitarbeiter zugeordnet werden soll
+     * @return Bestätigung mit Projekt- und Mitarbeiterdaten
+     * @throws ResourceNotFoundException wenn Projekt oder Mitarbeiter nicht gefunden werden
+     * @throws IllegalArgumentException wenn Validierungen fehlschlagen
+     */
     @Operation(summary = "Hinzufügen eines Mitarbeiters zu einem Projekt")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Mitarbeiter erfolgreich zu einem Projekt hinzugefügt"),
@@ -171,6 +208,17 @@ public class ProjektController {
         return new ResponseEntity<>(map, HttpStatus.OK);
     }
 
+    /**
+     * Aktualisiert ein bestehendes Projekt.
+     * Validiert alle geänderten Daten und prüft auf Konflikte bei Änderungen des Enddatums.
+     *
+     * @param dto Das DTO mit den zu aktualisierenden Projektdaten
+     * @param projektId Die ID des zu aktualisierenden Projekts
+     * @param jwt Das JWT-Token für die Authentifizierung
+     * @return Bestätigung mit den aktualisierten Projektdaten
+     * @throws ResourceNotFoundException wenn Projekt, Mitarbeiter, Kunde oder Qualifikationen nicht gefunden werden
+     * @throws ResourceConflictException wenn Mitarbeiter im neuen Zeitraum bereits verplant sind
+     */
     @PutMapping(path="/Projekt/{projektId}")
     public ProjektUpdateConfirmationDto updateProjekt(@RequestBody @Valid ProjektUpdateDto dto,
                                                       @PathVariable Long projektId,
@@ -233,7 +281,15 @@ public class ProjektController {
         returnDto.setGeplanteQualifikationen(geplanteQualifikationen);
         return returnDto;
     }
-  
+
+    /**
+     * Entfernt einen Mitarbeiter aus einem Projekt.
+     *
+     * @param projektId Die ID des Projekts
+     * @param mitarbeiterId Die ID des zu entfernenden Mitarbeiters
+     * @return Bestätigung mit den Details der entfernten Zuordnung
+     * @throws ResourceNotFoundException wenn Projekt, Mitarbeiter oder Zuordnung nicht gefunden werden
+     */
     @Operation(summary = "Entfernt einen Mitarbeiter aus einem Projekt")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Mitarbeiter erfolgreich aus Projekt entfernt"),
@@ -249,6 +305,12 @@ public class ProjektController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Findet alle Projekte, in denen ein bestimmter Mitarbeiter eingeplant ist.
+     *
+     * @param mitarbeiterId Die ID des Mitarbeiters
+     * @return Liste aller Projekte des Mitarbeiters in kompakter Form
+     */
     @Operation(summary = "Projekte anhand eines Mitarbeiters finden")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Projekte werden erfolgreich zurück gegeben"),
@@ -261,6 +323,12 @@ public class ProjektController {
         return new ResponseEntity<>(projekts, HttpStatus.OK);
     }
 
+    /**
+     * Gibt alle Projekte in kompakter Form zurück.
+     * Enthält nur die wichtigsten Informationen (ID, Bezeichnung, Verantwortlicher, Kunde).
+     *
+     * @return Liste aller Projekte in kompakter Form
+     */
     @Operation(summary = "Alle Projekt mit id, bezeichnung, verantwortlicherId und kundenId ausgeben.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Projekte werden erfolgreich zurück gegeben"),
