@@ -1,7 +1,9 @@
-package de.szut.lf8_projekt.integrationtests.projekt;
+package de.szut.lf8_projekt.projekt;
 
 import de.szut.lf8_projekt.ValidationService;
+import de.szut.lf8_projekt.mitarbeiter.SkillDto;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationEntity;
+import de.szut.lf8_projekt.projekt.geplante_qualifikation.QualifikationApiService;
 import de.szut.lf8_projekt.testcontainers.AbstractIntegrationTest;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
@@ -9,10 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,9 +26,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class PostIT extends AbstractIntegrationTest {
+public class CreateProjektIT extends AbstractIntegrationTest {
     @MockBean
     private ValidationService validationService;
+
+    @MockBean
+    private QualifikationApiService qualifikationApiService;
 
     @Test
     public void authorization() throws Exception {
@@ -76,6 +78,7 @@ public class PostIT extends AbstractIntegrationTest {
         when(validationService.validateMitarbeiterId(any(Long.class), nullable(String.class))).thenReturn(true);
         when(validationService.validateKundenId(any(Long.class), nullable(String.class))).thenReturn(true);
         when(validationService.validateQualifications(any(), nullable(String.class))).thenReturn(true);
+        when(qualifikationApiService.getAllQualifikations(nullable(String.class))).thenReturn(null);
 
         fehlendePflichtangabeHilfsmethode(content, "bezeichnung");
         fehlendePflichtangabeHilfsmethode(content, "verantwortlicherId");
@@ -125,6 +128,7 @@ public class PostIT extends AbstractIntegrationTest {
         when(validationService.validateMitarbeiterId(any(Long.class), nullable(String.class))).thenReturn(false);
         when(validationService.validateKundenId(any(Long.class), nullable(String.class))).thenReturn(true);
         when(validationService.validateQualifications(any(), nullable(String.class))).thenReturn(true);
+        when(qualifikationApiService.getAllQualifikations(nullable(String.class))).thenReturn(null);
 
         final var contentAsString = this.mockMvc.perform(post("/LF08Projekt/Projekt")
                         .content(content)
@@ -157,6 +161,7 @@ public class PostIT extends AbstractIntegrationTest {
         when(validationService.validateMitarbeiterId(any(Long.class), nullable(String.class))).thenReturn(true);
         when(validationService.validateKundenId(any(Long.class), nullable(String.class))).thenReturn(false);
         when(validationService.validateQualifications(any(), nullable(String.class))).thenReturn(true);
+        when(qualifikationApiService.getAllQualifikations(nullable(String.class))).thenReturn(null);
 
         final var contentAsString = this.mockMvc.perform(post("/LF08Projekt/Projekt")
                         .content(content)
@@ -187,6 +192,7 @@ public class PostIT extends AbstractIntegrationTest {
         when(validationService.validateMitarbeiterId(any(Long.class), nullable(String.class))).thenReturn(true);
         when(validationService.validateKundenId(any(Long.class), nullable(String.class))).thenReturn(true);
         when(validationService.validateQualifications(any(), nullable(String.class))).thenReturn(false);
+        when(qualifikationApiService.getAllQualifikations(nullable(String.class))).thenReturn(null);
 
         final var contentAsString = this.mockMvc.perform(post("/LF08Projekt/Projekt")
                         .content(content)
@@ -194,6 +200,37 @@ public class PostIT extends AbstractIntegrationTest {
                         .with(csrf()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message", is("Liste der geplanten Qualifikationen enthält eine ungültige Qualifikation")));
+    }
+
+    @Test
+    @WithMockUser
+    public void enddatumVorStartdatum() throws Exception {
+        final String content = """
+                {
+                    "bezeichnung": "Einführung CRM-System",
+                    "verantwortlicherId": 2,
+                    "kundenId": 1,
+                    "kundeAnsprechperson": "Sabine Bauer",
+                    "projektzielKommentar": "Pilot im Vertrieb Q4, Rollout Q1",
+                    "startdatum": "2025-10-15T00:00:00Z",
+                    "geplantesEnddatum": "2024-01-31T23:59:59Z",
+                    "geplanteQualifikationen": [
+                        "Alien"
+                        ]
+                }
+                """;
+
+        when(validationService.validateMitarbeiterId(any(Long.class), nullable(String.class))).thenReturn(true);
+        when(validationService.validateKundenId(any(Long.class), nullable(String.class))).thenReturn(true);
+        when(validationService.validateQualifications(any(), nullable(String.class))).thenReturn(true);
+        when(qualifikationApiService.getAllQualifikations(nullable(String.class))).thenReturn(null);
+
+        final var contentAsString = this.mockMvc.perform(post("/LF08Projekt/Projekt")
+                        .content(content)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
+                .andExpect(status().isTooEarly())
+                .andExpect(jsonPath("$.message", is("Das geplante Ende des Projekts kann nicht vor dem Start des Projekts liegen")));
     }
 
     @Test
@@ -216,9 +253,25 @@ public class PostIT extends AbstractIntegrationTest {
                 }
                 """;
 
+        SkillDto skill0 = new SkillDto();
+        skill0.setId(0L);
+        skill0.setSkill("CRM-Administration");
+        SkillDto skill1 = new SkillDto();
+        skill1.setId(1L);
+        skill1.setSkill("Datenschutz-Grundlagen");
+        SkillDto skill2 = new SkillDto();
+        skill2.setId(2L);
+        skill2.setSkill("Vertriebsschulung");
+        SkillDto[] skillDtos = new SkillDto[3];
+        skillDtos[0] = skill0;
+        skillDtos[1] = skill1;
+        skillDtos[2] = skill2;
+
+
         when(validationService.validateMitarbeiterId(any(Long.class), nullable(String.class))).thenReturn(true);
         when(validationService.validateKundenId(any(Long.class), nullable(String.class))).thenReturn(true);
         when(validationService.validateQualifications(any(), nullable(String.class))).thenReturn(true);
+        when(qualifikationApiService.getAllQualifikations(nullable(String.class))).thenReturn(skillDtos);
 
         final var contentAsString = this.mockMvc.perform(post("/LF08Projekt/Projekt")
                         .content(content)
@@ -252,7 +305,7 @@ public class PostIT extends AbstractIntegrationTest {
         assertThat(loadedEntity.get().getProjektzielKommentar()).isEqualTo("Pilot im Vertrieb Q4, Rollout Q1");
         assertThat(loadedEntity.get().getStartdatum()).isNotNull();
         assertThat(loadedEntity.get().getGeplantesEnddatum()).isNotNull();
-        assertThat(loadedQualifications.stream().map(GeplanteQualifikationEntity::getQualifikation).toList())
-                .containsExactlyInAnyOrder("CRM-Administration", "Datenschutz-Grundlagen", "Vertriebsschulung");
+        assertThat(loadedQualifications.stream().map(GeplanteQualifikationEntity::getQualifikationId).toList())
+                .containsExactlyInAnyOrder(0L, 1L, 2L);
     }
 }

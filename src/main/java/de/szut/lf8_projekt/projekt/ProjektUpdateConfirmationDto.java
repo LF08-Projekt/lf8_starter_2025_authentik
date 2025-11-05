@@ -6,9 +6,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
+/**
+ * DTO, das die Daten nach erfolgreicher Projektaktualisierung zurückgibt.
+ */
 @NoArgsConstructor
 @Getter
 @Setter
