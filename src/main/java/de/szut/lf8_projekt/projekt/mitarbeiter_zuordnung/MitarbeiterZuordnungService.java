@@ -65,7 +65,7 @@ public class MitarbeiterZuordnungService {
      * @throws ResourceNotFoundException wenn der Mitarbeiter nicht existiert
      * @throws ResourceNotFoundException wenn der Mitarbeiter nicht in dem Projekt arbeitet
      */
-    public MitarbeiterEntfernenResponseDto entferneMitarbeiterAusProjekt(Long projektId, Long mitarbeiterId) {
+    public MitarbeiterEntfernenResponseDto entferneMitarbeiterAusProjekt(Long projektId, Long mitarbeiterId, String securityToken) {
         // Validiere IDs
         if (projektId == null || projektId <= 0) {
             throw new IllegalArgumentException("Projekt-ID muss größer als 0 sein");
@@ -81,7 +81,7 @@ public class MitarbeiterZuordnungService {
         }
 
         // Prüfe ob Mitarbeiter existiert
-        MitarbeiterDto mitarbeiter = mitarbeiterApiService.getMitarbeiterById(mitarbeiterId);
+        MitarbeiterDto mitarbeiter = mitarbeiterApiService.getMitarbeiterById(mitarbeiterId, securityToken);
         if (mitarbeiter == null) {
             throw new ResourceNotFoundException("Mitarbeiter mit der ID " + mitarbeiterId + " existiert nicht");
         }

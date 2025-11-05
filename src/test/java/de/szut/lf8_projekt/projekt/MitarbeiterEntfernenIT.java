@@ -15,7 +15,8 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.ignoreStubs;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -56,7 +57,7 @@ public class MitarbeiterEntfernenIT extends AbstractIntegrationTest {
         mitarbeiter.setId(42L);
         mitarbeiter.setVorname("Max");
         mitarbeiter.setNachname("Mustermann");
-        when(mitarbeiterApiService.getMitarbeiterById(42L)).thenReturn(mitarbeiter);
+        when(mitarbeiterApiService.getMitarbeiterById(eq(42L), anyString())).thenReturn(mitarbeiter);
 
         // Test durchführen
         this.mockMvc.perform(delete("/LF08Projekt/" + projekt.getId() + "/mitarbeiter/42")
@@ -93,7 +94,7 @@ public class MitarbeiterEntfernenIT extends AbstractIntegrationTest {
         projekt = projektRepository.save(projekt);
 
         // Mock: Mitarbeiter existiert nicht
-        when(mitarbeiterApiService.getMitarbeiterById(999L)).thenReturn(null);
+        when(mitarbeiterApiService.getMitarbeiterById(999L, anyString())).thenReturn(null);
 
         this.mockMvc.perform(delete("/LF08Projekt/" + projekt.getId() + "/mitarbeiter/999")
                         .with(csrf()))
@@ -117,7 +118,7 @@ public class MitarbeiterEntfernenIT extends AbstractIntegrationTest {
         mitarbeiter.setId(42L);
         mitarbeiter.setVorname("Max");
         mitarbeiter.setNachname("Mustermann");
-        when(mitarbeiterApiService.getMitarbeiterById(42L)).thenReturn(mitarbeiter);
+        when(mitarbeiterApiService.getMitarbeiterById(42L, anyString())).thenReturn(mitarbeiter);
 
         // Keine Zuordnung erstellt!
 

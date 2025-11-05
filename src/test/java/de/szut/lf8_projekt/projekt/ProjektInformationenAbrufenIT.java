@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -96,7 +97,7 @@ public class ProjektInformationenAbrufenIT extends AbstractIntegrationTest {
         javaSkill.setId(1L);
         javaSkill.setSkill("Java");
         mitarbeiter.setSkillSet(Arrays.asList(javaSkill));
-        when(mitarbeiterApiService.getMitarbeiterById(42L)).thenReturn(mitarbeiter);
+        when(mitarbeiterApiService.getMitarbeiterById(42L, anyString())).thenReturn(mitarbeiter);
 
         // Test
         this.mockMvc.perform(get("/LF08Projekt/Projekt/" + projekt.getId()))
@@ -143,7 +144,7 @@ public class ProjektInformationenAbrufenIT extends AbstractIntegrationTest {
         javaSkill.setId(1L);
         javaSkill.setSkill("Java");
         mitarbeiter1.setSkillSet(Arrays.asList(javaSkill));
-        when(mitarbeiterApiService.getMitarbeiterById(42L)).thenReturn(mitarbeiter1);
+        when(mitarbeiterApiService.getMitarbeiterById(42L, anyString())).thenReturn(mitarbeiter1);
 
         // Mock Mitarbeiter 2
         MitarbeiterDto mitarbeiter2 = new MitarbeiterDto();
@@ -154,7 +155,7 @@ public class ProjektInformationenAbrufenIT extends AbstractIntegrationTest {
         reactSkill.setId(2L);
         reactSkill.setSkill("React");
         mitarbeiter2.setSkillSet(Arrays.asList(reactSkill));
-        when(mitarbeiterApiService.getMitarbeiterById(43L)).thenReturn(mitarbeiter2);
+        when(mitarbeiterApiService.getMitarbeiterById(43L, anyString())).thenReturn(mitarbeiter2);
 
         // Test
         this.mockMvc.perform(get("/LF08Projekt/Projekt/" + projekt.getId() + "/Mitarbeiter"))

@@ -117,7 +117,7 @@ public class ProjektService {
      * @return Ein DTO mit allen Projektdetails und berechneten fehlenden Qualifikationen
      * @throws ResourceNotFoundException wenn das Projekt nicht existiert
      */
-    public ProjektGetDto holeProjektDetails(Long projektId) {
+    public ProjektGetDto holeProjektDetails(Long projektId, String securityToken) {
         ProjektEntity projekt = readById(projektId);
 
         List<GeplanteQualifikationEntity> geplant = geplanteQualifikationRepository.getGeplanteQualifikationEntitiesByProjektId(projektId);
@@ -125,7 +125,7 @@ public class ProjektService {
                 .map(GeplanteQualifikationEntity::getQualifikation)
                 .collect(Collectors.toList());
 
-        List<String> fehlendeQualifikationen = berechneFehlendeQualifikationen(projektId, geplanteQualifikationen);
+        List<String> fehlendeQualifikationen = berechneFehlendeQualifikationen(projektId, geplanteQualifikationen, securityToken);
 
         ProjektGetDto dto = new ProjektGetDto();
         dto.setProjektId(projekt.getId());
@@ -150,14 +150,14 @@ public class ProjektService {
      * @return Ein DTO mit allen Mitarbeitern des Projekts inklusive ihrer Qualifikationen
      * @throws ResourceNotFoundException wenn das Projekt nicht existiert
      */
-    public ProjektMitarbeiterGetDto holeProjektMitarbeiter(Long projektId) {
+    public ProjektMitarbeiterGetDto holeProjektMitarbeiter(Long projektId, String securityToken) {
         ProjektEntity projekt = readById(projektId);
 
         List<MitarbeiterZuordnungEntity> zuordnungen = mitarbeiterZuordnungRepository.getMitarbeiterZuordnungEntitiesByProjektId(projektId);
         List<MitarbeiterImProjektDto> mitarbeiter = new ArrayList<>();
 
         for (MitarbeiterZuordnungEntity zuordnung : zuordnungen) {
-            MitarbeiterDto mitarbeiterDto = mitarbeiterApiService.getMitarbeiterById(zuordnung.getMitarbeiterId());
+            MitarbeiterDto mitarbeiterDto = mitarbeiterApiService.getMitarbeiterById(zuordnung.getMitarbeiterId(), securityToken);
             if (mitarbeiterDto != null) {
                 MitarbeiterImProjektDto imProjekt = new MitarbeiterImProjektDto();
                 imProjekt.setMitarbeiterId(mitarbeiterDto.getId());
@@ -186,12 +186,12 @@ public class ProjektService {
      * @param geplanteQualifikationen Die Liste der geplanten Qualifikationen
      * @return Liste der Qualifikationen die geplant sind aber von keinem Mitarbeiter erfüllt werden
      */
-    private List<String> berechneFehlendeQualifikationen(Long projektId, List<String> geplanteQualifikationen) {
+    private List<String> berechneFehlendeQualifikationen(Long projektId, List<String> geplanteQualifikationen, String securityToken) {
         List<MitarbeiterZuordnungEntity> zuordnungen = mitarbeiterZuordnungRepository.getMitarbeiterZuordnungEntitiesByProjektId(projektId);
         List<String> vorhandeneQualifikationen = new ArrayList<>();
 
         for (MitarbeiterZuordnungEntity zuordnung : zuordnungen) {
-            MitarbeiterDto mitarbeiter = mitarbeiterApiService.getMitarbeiterById(zuordnung.getMitarbeiterId());
+            MitarbeiterDto mitarbeiter = mitarbeiterApiService.getMitarbeiterById(zuordnung.getMitarbeiterId(), securityToken);
             if (mitarbeiter != null && mitarbeiter.getSkillSet() != null) {
                 vorhandeneQualifikationen.addAll(
                         mitarbeiter.getSkillSet().stream()
@@ -215,7 +215,7 @@ public class ProjektService {
      * @return Ein DTO mit allen Informationen des gelöschten Projekts
      * @throws ResourceNotFoundException wenn das Projekt nicht existiert
      */
-    public ProjektLoeschenResponseDto loescheProjekt(Long projektId) {
+    public ProjektLoeschenResponseDto loescheProjekt(Long projektId, String securityToken) {
         ProjektEntity projekt = readById(projektId);
 
         List<GeplanteQualifikationEntity> geplant = geplanteQualifikationRepository.getGeplanteQualifikationEntitiesByProjektId(projektId);
@@ -223,7 +223,7 @@ public class ProjektService {
                 .map(GeplanteQualifikationEntity::getQualifikation)
                 .collect(Collectors.toList());
 
-        ProjektMitarbeiterGetDto mitarbeiterDto = holeProjektMitarbeiter(projektId);
+        ProjektMitarbeiterGetDto mitarbeiterDto = holeProjektMitarbeiter(projektId, securityToken);
 
         ProjektLoeschenResponseDto responseDto = new ProjektLoeschenResponseDto();
         responseDto.setProjektId(projekt.getId());

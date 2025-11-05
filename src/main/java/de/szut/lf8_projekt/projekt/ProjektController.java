@@ -127,17 +127,24 @@ public class ProjektController {
     })
     @PostMapping("{projekt_id}/mitarbeiter/{mitarbeiter_id}")
     public ResponseEntity<Object> addMitarbeiterToProjekt(@PathVariable final Long projekt_id, @PathVariable final Long mitarbeiter_id,
-                                                                     @Valid @RequestBody final SkillDto skill) {
+                                                                    @Valid @RequestBody final SkillDto skill,
+                                                                    @AuthenticationPrincipal Jwt jwt) {
+        String securityToken = jwt != null ? jwt.getTokenValue() : null;
         boolean qualifikationInProjekt = false;
         ProjektEntity projekt = this.projektService.readById(projekt_id);
-        MitarbeiterDto mitarbeiterDto = this.mitarbeiterApiService.getMitarbeiterById(mitarbeiter_id);
+        if (!this.validationService.validateMitarbeiterId(mitarbeiter_id, securityToken)) {
+            throw new ResourceNotFoundException("Der Mitarbeiter mit der ID " + mitarbeiter_id + " existiert nicht!");
+        }
+
+        MitarbeiterDto mitarbeiterDto = this.mitarbeiterApiService.getMitarbeiterById(mitarbeiter_id, securityToken);
+
         if (mitarbeiterDto == null) {
             throw new ResourceNotFoundException("Der Mitarbeiter mit der Id " + mitarbeiter_id + " existiert nicht");
         }
         List<GeplanteQualifikationEntity> geplanteQualifikationen = this.geplanteQualifikationService.readByProjektId(projekt_id);
 
         for (GeplanteQualifikationEntity geplanteQualifikation : geplanteQualifikationen) {
-            if (Objects.equals(geplanteQualifikation.getQualifikationId(), skill.getId())) {
+            if (Objects.equals(geplanteQualifikation.getQualifikation(), skill.getSkill())) {
                 qualifikationInProjekt = true;
                 break;
             }
@@ -243,9 +250,10 @@ public class ProjektController {
     @RequestMapping(value = "/{projektId}/mitarbeiter/{mitarbeiterId}", method = RequestMethod.DELETE)
     public ResponseEntity<MitarbeiterEntfernenResponseDto> entferneMitarbeiterAusProjekt(
             @PathVariable Long projektId,
-            @PathVariable Long mitarbeiterId) {
-
-        MitarbeiterEntfernenResponseDto response = mitarbeiterZuordnungService.entferneMitarbeiterAusProjekt(projektId, mitarbeiterId);
+            @PathVariable Long mitarbeiterId,
+            @AuthenticationPrincipal Jwt jwt) {
+        String securityToken = jwt != null ? jwt.getTokenValue() : null;
+        MitarbeiterEntfernenResponseDto response = mitarbeiterZuordnungService.entferneMitarbeiterAusProjekt(projektId, mitarbeiterId, securityToken);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -254,7 +262,7 @@ public class ProjektController {
             @ApiResponse(responseCode = "200", description = "Projekte werden erfolgreich zurück gegeben"),
             @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
     })
-    @RequestMapping("/Mitarbeiter/{mitarbeiterId}/Projekt")
+    @GetMapping("/Mitarbeiter/{mitarbeiterId}/Projekt")
     public ResponseEntity<Object> ReadProjektsByMitarbeiterId(@PathVariable final Long mitarbeiterId) {
         List<MitarbeiterZuordnungEntity> mitarbeiterZuordnungen = this.mitarbeiterZuordnungService.getAllProjektsFromMitarbeiter(mitarbeiterId);
         List<ProjektCompactDto> projekts = this.projektService.readByMitarbeiterId(mitarbeiterZuordnungen);
@@ -266,7 +274,7 @@ public class ProjektController {
             @ApiResponse(responseCode = "200", description = "Projekte werden erfolgreich zurück gegeben"),
             @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
     })
-    @RequestMapping("/Projekt")
+    @GetMapping("/Projekt")
     public ResponseEntity<Object> ReadAllProjekts() {
         List<ProjektEntity> projekts = this.projektService.readAll();
         List<ProjektCompactDto> compactProjekts = new ArrayList<>();
@@ -290,8 +298,9 @@ public class ProjektController {
         @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
     })
     @GetMapping(value = "/Projekt/{id}")
-    public ResponseEntity<ProjektGetDto> holeProjekt(@PathVariable Long id) {
-        ProjektGetDto projekt = projektService.holeProjektDetails(id);
+    public ResponseEntity<ProjektGetDto> holeProjekt(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        String securityToken = jwt != null ? jwt.getTokenValue() : null;
+        ProjektGetDto projekt = projektService.holeProjektDetails(id, securityToken);
         return new ResponseEntity<>(projekt, HttpStatus.OK);
     }
 
@@ -308,8 +317,9 @@ public class ProjektController {
         @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
     })
     @GetMapping(value = "/Projekt/{id}/Mitarbeiter")
-    public ResponseEntity<ProjektMitarbeiterGetDto> holeProjektMitarbeiter(@PathVariable Long id) {
-        ProjektMitarbeiterGetDto mitarbeiter = projektService.holeProjektMitarbeiter(id);
+    public ResponseEntity<ProjektMitarbeiterGetDto> holeProjektMitarbeiter(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        String securityToken = jwt != null ? jwt.getTokenValue() : null;
+        ProjektMitarbeiterGetDto mitarbeiter = projektService.holeProjektMitarbeiter(id,securityToken);
         return new ResponseEntity<>(mitarbeiter, HttpStatus.OK);
     }
 
@@ -326,8 +336,9 @@ public class ProjektController {
         @ApiResponse(responseCode = "401", description = "Ungültiges Token", content = @Content)
     })
     @DeleteMapping(value = "/Projekt/{id}")
-    public ResponseEntity<ProjektLoeschenResponseDto> loescheProjekt(@PathVariable Long id) {
-        ProjektLoeschenResponseDto response = projektService.loescheProjekt(id);
+    public ResponseEntity<ProjektLoeschenResponseDto> loescheProjekt(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        String securityToken = jwt != null ? jwt.getTokenValue() : null;
+        ProjektLoeschenResponseDto response = projektService.loescheProjekt(id, securityToken);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
