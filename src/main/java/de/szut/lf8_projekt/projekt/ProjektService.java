@@ -40,6 +40,35 @@ public class ProjektService {
         return this.repository.save(entity);
     }
 
+    public ProjektEntity save(ProjektEntity entity) {
+        ProjektEntity updatedProjektEntity = readById(entity.getId());
+        if (entity.getBezeichnung() != null) {
+            updatedProjektEntity.setBezeichnung(entity.getBezeichnung());
+        }
+        if (entity.getVerantwortlicherId() != null) {
+            updatedProjektEntity.setVerantwortlicherId(entity.getVerantwortlicherId());
+        }
+        if (entity.getKundenId() != null) {
+            updatedProjektEntity.setKundenId(entity.getKundenId());
+        }
+        if (entity.getKundeAnsprechperson() != null) {
+            updatedProjektEntity.setKundeAnsprechperson(entity.getKundeAnsprechperson());
+        }
+        if (entity.getProjektzielKommentar() != null) {
+            updatedProjektEntity.setProjektzielKommentar(entity.getProjektzielKommentar());
+        }
+        if (entity.getStartdatum() != null) {
+            updatedProjektEntity.setStartdatum(entity.getStartdatum());
+        }
+        if (entity.getGeplantesEnddatum() != null) {
+            updatedProjektEntity.setGeplantesEnddatum(entity.getGeplantesEnddatum());
+        }
+        if (entity.getWirklichesEnddatum() != null) {
+            updatedProjektEntity.setWirklichesEnddatum(entity.getWirklichesEnddatum());
+        }
+        return this.repository.save(updatedProjektEntity);
+    }
+
     public List<ProjektEntity> readAll() {
         return this.repository.findAll();
     }

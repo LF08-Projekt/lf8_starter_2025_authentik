@@ -2,8 +2,12 @@ package de.szut.lf8_projekt.projekt;
 
 import de.szut.lf8_projekt.mapping.MitarbeiterMappingService;
 import de.szut.lf8_projekt.mitarbeiter.SkillDto;
+import de.szut.lf8_projekt.ValidationService;
+import de.szut.lf8_projekt.exceptionHandling.ResourceConflictException;
+import de.szut.lf8_projekt.exceptionHandling.ResourceNotFoundException;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationEntity;
 import de.szut.lf8_projekt.ValidationService;
+import de.szut.lf8_projekt.exceptionHandling.ResourceConflictException;
 import de.szut.lf8_projekt.exceptionHandling.ResourceNotFoundException;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationService;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterApiService;
@@ -22,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +51,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping(value="/LF08Projekt")
@@ -169,6 +176,69 @@ public class ProjektController {
         return new ResponseEntity<>(map, HttpStatus.OK);
     }
 
+    @PutMapping(path="/Projekt/{projektId}")
+    public ProjektUpdateConfirmationDto updateProjekt(@RequestBody @Valid ProjektUpdateDto dto,
+                                                      @PathVariable Long projektId,
+                                                      @AuthenticationPrincipal Jwt jwt) {
+        ProjektEntity previousSaveState = this.projektService.readById(projektId);
+        if (previousSaveState == null) {
+            throw new ResourceNotFoundException("Projekt mit der ID " + projektId + " existiert nicht");
+        }
+
+        String securityToken = jwt != null ? jwt.getTokenValue() : null;
+        if (dto.getVerantwortlicherId() != null && !this.validationService.validateMitarbeiterId(dto.getVerantwortlicherId(), securityToken)) {
+            throw new ResourceNotFoundException("Mitarbeiter mit der ID " + dto.getVerantwortlicherId() + " existiert nicht!");
+        }
+        if (dto.getKundenId() != null && !this.validationService.validateKundenId(dto.getKundenId(), securityToken)) {
+            throw new ResourceNotFoundException("Kunde mit der ID + " + dto.getKundenId() + " existiert nicht!");
+        }
+        if (dto.getGeplanteQualifikationen() != null && !this.validationService.validateQualifications(Arrays.asList(dto.getGeplanteQualifikationen()), securityToken)) {
+            throw new ResourceNotFoundException("Liste der geplanten Qualifikationen enthält eine ungültige Qualifikation");
+        }
+        if (dto.getGeplantesEnddatum() != null) {
+            LocalDateTime neuesGeplantesEnddatum = dto.getGeplantesEnddatum();
+            List<ProjektEntity> possibleCollisions = this.projektService.readByDate(previousSaveState.getGeplantesEnddatum(), neuesGeplantesEnddatum);
+            for (ProjektEntity projektEntity : possibleCollisions) {
+                if (projektEntity.getId() != projektId) {
+                    List<MitarbeiterZuordnungEntity> mitarbeiterZuordnungEntities
+                            = mitarbeiterZuordnungService.getMitarbeiterZuordnungEntitiesByProjektId(projektId);
+
+                    for (MitarbeiterZuordnungEntity mitarbeiterZuordnungEntity : mitarbeiterZuordnungEntities) {
+                        if (mitarbeiterZuordnungService.projektHasMitarbeiter(projektEntity.getId(), mitarbeiterZuordnungEntity.getMitarbeiterId())) {
+                            throw new ResourceConflictException("Mitarbeiter " + mitarbeiterZuordnungEntity.getMitarbeiterId() + " ist" +
+                                    " zu diesem Zeit bereits in Projekt " + mitarbeiterZuordnungEntity.getProjektId() + " verplant." +
+                                    " Bitte klären sie diesen Konflikt");
+                        }
+                    }
+                }
+            }
+        }
+
+        ProjektEntity projektEntity = this.projektMappingService.mapProjektUpdateDtoToProjektEntity(dto, projektId);
+        projektEntity = this.projektService.save(projektEntity);
+
+        List<String> geplanteQualifikationen = new ArrayList<>();
+        if (dto.getGeplanteQualifikationen() != null) {
+            List<GeplanteQualifikationEntity> qualifikationEntities = this.geplanteQualifikationService.readByProjektId(projektId);
+            for (String qualifikation : dto.getGeplanteQualifikationen()) {
+                if (qualifikationEntities.stream().filter(x -> x.getQualifikation().equals(qualifikation)).findAny().isEmpty()) {
+                    GeplanteQualifikationEntity geplanteQualifikationEntity = this.projektMappingService.mapDataToGeplanteQualifikationEntity(projektEntity.getId(), qualifikation);
+                    geplanteQualifikationEntity = this.geplanteQualifikationService.create(geplanteQualifikationEntity);
+                    geplanteQualifikationen.add(geplanteQualifikationEntity.getQualifikation());
+                }
+            }
+            for (GeplanteQualifikationEntity qualifikationEntity : qualifikationEntities) {
+                if (geplanteQualifikationen.stream().filter(x -> x.equals(qualifikationEntity.getQualifikation())).findAny().isEmpty()) {
+                    this.geplanteQualifikationService.delete(qualifikationEntity);
+                }
+            }
+        }
+
+        ProjektUpdateConfirmationDto returnDto = this.projektMappingService.mapProjektEntityToProjektUpdateConfirmationDto(projektEntity);
+        returnDto.setGeplanteQualifikationen(geplanteQualifikationen);
+        return returnDto;
+    }
+  
     @Operation(summary = "Entfernt einen Mitarbeiter aus einem Projekt")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Mitarbeiter erfolgreich aus Projekt entfernt"),
