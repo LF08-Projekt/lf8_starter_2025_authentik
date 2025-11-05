@@ -26,7 +26,4 @@ public class GeplanteQualifikationEntity {
 
     /** ID der Qualifikation (Referenz zur externen Employee-API) */
     private Long qualifikationId;
-
-    /** Bezeichnung der Qualifikation */
-    private String qualifikation;
 }

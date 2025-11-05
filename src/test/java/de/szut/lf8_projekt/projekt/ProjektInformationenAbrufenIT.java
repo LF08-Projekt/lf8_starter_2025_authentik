@@ -3,6 +3,7 @@ package de.szut.lf8_projekt.projekt;
 import de.szut.lf8_projekt.Application;
 import de.szut.lf8_projekt.mitarbeiter.SkillDto;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationEntity;
+import de.szut.lf8_projekt.projekt.geplante_qualifikation.QualifikationApiService;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterApiService;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungEntity;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterDto;
@@ -20,6 +21,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -30,6 +32,9 @@ public class ProjektInformationenAbrufenIT extends AbstractIntegrationTest {
 
     @MockBean
     private MitarbeiterApiService mitarbeiterApiService;
+
+    @MockBean
+    private QualifikationApiService qualifikationApiService;
 
     @Test
     void projektDetailsOhneAuthentifizierung() throws Exception {
@@ -76,13 +81,24 @@ public class ProjektInformationenAbrufenIT extends AbstractIntegrationTest {
         // Geplante Qualifikationen
         GeplanteQualifikationEntity qual1 = new GeplanteQualifikationEntity();
         qual1.setProjektId(projekt.getId());
-        qual1.setQualifikation("Java");
+        qual1.setQualifikationId(1L);
         geplanteQualifikationRepository.save(qual1);
 
         GeplanteQualifikationEntity qual2 = new GeplanteQualifikationEntity();
         qual2.setProjektId(projekt.getId());
-        qual2.setQualifikation("React");
+        qual2.setQualifikationId(2L);
         geplanteQualifikationRepository.save(qual2);
+
+        // Mock Qualifikationen
+        SkillDto javaSkill = new SkillDto();
+        javaSkill.setId(1L);
+        javaSkill.setSkill("Java");
+        when(qualifikationApiService.getQualifikationById(eq(1L), nullable(String.class))).thenReturn(javaSkill);
+
+        SkillDto reactSkill = new SkillDto();
+        reactSkill.setId(2L);
+        reactSkill.setSkill("React");
+        when(qualifikationApiService.getQualifikationById(eq(2L), nullable(String.class))).thenReturn(reactSkill);
 
         // Mitarbeiter zuordnen
         MitarbeiterZuordnungEntity zuordnung = new MitarbeiterZuordnungEntity();
@@ -95,9 +111,6 @@ public class ProjektInformationenAbrufenIT extends AbstractIntegrationTest {
         mitarbeiter.setId(42L);
         mitarbeiter.setVorname("Max");
         mitarbeiter.setNachname("Mustermann");
-        SkillDto javaSkill = new SkillDto();
-        javaSkill.setId(1L);
-        javaSkill.setSkill("Java");
         mitarbeiter.setSkillSet(Arrays.asList(javaSkill));
         when(mitarbeiterApiService.getMitarbeiterById(ArgumentMatchers.any(Long.class), nullable(String.class))).thenReturn(mitarbeiter);
 
@@ -204,13 +217,24 @@ public class ProjektInformationenAbrufenIT extends AbstractIntegrationTest {
 
         GeplanteQualifikationEntity qual1 = new GeplanteQualifikationEntity();
         qual1.setProjektId(projekt.getId());
-        qual1.setQualifikation("Java");
+        qual1.setQualifikationId(1L);
         geplanteQualifikationRepository.save(qual1);
 
         GeplanteQualifikationEntity qual2 = new GeplanteQualifikationEntity();
         qual2.setProjektId(projekt.getId());
-        qual2.setQualifikation("React");
+        qual2.setQualifikationId(2L);
         geplanteQualifikationRepository.save(qual2);
+
+        // Mock Qualifikationen
+        SkillDto javaSkill = new SkillDto();
+        javaSkill.setId(1L);
+        javaSkill.setSkill("Java");
+        when(qualifikationApiService.getQualifikationById(eq(1L), nullable(String.class))).thenReturn(javaSkill);
+
+        SkillDto reactSkill = new SkillDto();
+        reactSkill.setId(2L);
+        reactSkill.setSkill("React");
+        when(qualifikationApiService.getQualifikationById(eq(2L), nullable(String.class))).thenReturn(reactSkill);
 
         this.mockMvc.perform(get("/LF08Projekt/Projekt/" + projekt.getId()))
                 .andExpect(status().isOk())

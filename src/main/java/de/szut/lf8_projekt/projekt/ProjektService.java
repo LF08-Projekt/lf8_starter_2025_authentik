@@ -1,6 +1,7 @@
 package de.szut.lf8_projekt.projekt;
 
 import de.szut.lf8_projekt.exceptionHandling.ResourceNotFoundException;
+import de.szut.lf8_projekt.mitarbeiter.SkillDto;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungEntity;
 import de.szut.lf8_projekt.projekt.dto.MitarbeiterImProjektDto;
 import de.szut.lf8_projekt.projekt.dto.ProjektGetDto;
@@ -8,6 +9,7 @@ import de.szut.lf8_projekt.projekt.dto.ProjektLoeschenResponseDto;
 import de.szut.lf8_projekt.projekt.dto.ProjektMitarbeiterGetDto;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationEntity;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationRepository;
+import de.szut.lf8_projekt.projekt.geplante_qualifikation.QualifikationApiService;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterApiService;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungRepository;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterDto;
@@ -30,6 +32,7 @@ public class ProjektService {
     private final GeplanteQualifikationRepository geplanteQualifikationRepository;
     private final MitarbeiterZuordnungRepository mitarbeiterZuordnungRepository;
     private final MitarbeiterApiService mitarbeiterApiService;
+    private final QualifikationApiService qualifikationApiService;
 
     /**
      * Konstruktor für den ProjektService.
@@ -38,18 +41,21 @@ public class ProjektService {
      * @param geplanteQualifikationRepository Repository für geplante Qualifikationen
      * @param mitarbeiterZuordnungRepository Repository für Mitarbeiterzuordnungen
      * @param mitarbeiterApiService Service für externe Mitarbeiter-API-Aufrufe
+     * @param qualifikationApiService Service für externe Qualifikations-API-Aufrufe
      * @param projektMappingService Service für Projekt-Mappings
      */
     public ProjektService(ProjektRepository repository,
                           GeplanteQualifikationRepository geplanteQualifikationRepository,
                           MitarbeiterZuordnungRepository mitarbeiterZuordnungRepository,
                           MitarbeiterApiService mitarbeiterApiService,
+                          QualifikationApiService qualifikationApiService,
                           ProjektMappingService projektMappingService) {
         this.repository = repository;
         this.projektMappingService = projektMappingService;
         this.geplanteQualifikationRepository = geplanteQualifikationRepository;
         this.mitarbeiterZuordnungRepository = mitarbeiterZuordnungRepository;
         this.mitarbeiterApiService = mitarbeiterApiService;
+        this.qualifikationApiService = qualifikationApiService;
     }
 
     /**
@@ -165,18 +171,29 @@ public class ProjektService {
      * Holt alle Details eines Projekts inklusive der fehlenden Qualifikationen.
      * Die fehlenden Qualifikationen werden berechnet als: geplante Qualifikationen minus
      * vorhandene Qualifikationen aller im Projekt arbeitenden Mitarbeiter.
+     * Qualifikationsnamen werden dynamisch über die API anhand der IDs geholt.
      *
      * @param projektId Die ID des Projekts
+     * @param securityToken JWT Token für API-Authentifizierung
      * @return Ein DTO mit allen Projektdetails und berechneten fehlenden Qualifikationen
      * @throws ResourceNotFoundException wenn das Projekt nicht existiert
      */
     public ProjektGetDto holeProjektDetails(Long projektId, String securityToken) {
         ProjektEntity projekt = readById(projektId);
+        if (projekt == null) {
+            throw new ResourceNotFoundException("Das Projekt mit der ID " + projektId + " existiert nicht.");
+        }
 
         List<GeplanteQualifikationEntity> geplant = geplanteQualifikationRepository.getGeplanteQualifikationEntitiesByProjektId(projektId);
-        List<String> geplanteQualifikationen = geplant.stream()
-                .map(GeplanteQualifikationEntity::getQualifikation)
-                .collect(Collectors.toList());
+        List<String> geplanteQualifikationen = new ArrayList<>();
+
+        // Qualifikationsnamen über API anhand der IDs holen
+        for (GeplanteQualifikationEntity geplanteQual : geplant) {
+            SkillDto qualifikation = qualifikationApiService.getQualifikationById(geplanteQual.getQualifikationId(), securityToken);
+            if (qualifikation != null) {
+                geplanteQualifikationen.add(qualifikation.getSkill());
+            }
+        }
 
         List<String> fehlendeQualifikationen = berechneFehlendeQualifikationen(projektId, geplanteQualifikationen, securityToken);
 
@@ -205,6 +222,9 @@ public class ProjektService {
      */
     public ProjektMitarbeiterGetDto holeProjektMitarbeiter(Long projektId, String securityToken) {
         ProjektEntity projekt = readById(projektId);
+        if (projekt == null) {
+            throw new ResourceNotFoundException("Das Projekt mit der ID " + projektId + " existiert nicht.");
+        }
 
         List<MitarbeiterZuordnungEntity> zuordnungen = mitarbeiterZuordnungRepository.getMitarbeiterZuordnungEntitiesByProjektId(projektId);
         List<MitarbeiterImProjektDto> mitarbeiter = new ArrayList<>();
@@ -263,18 +283,29 @@ public class ProjektService {
      * Löscht ein Projekt und gibt alle Projektinformationen zurück.
      * Sammelt vor dem Löschen alle Projektdaten inklusive zugeordneter Mitarbeiter
      * und benötigter Qualifikationen.
+     * Qualifikationsnamen werden dynamisch über die API anhand der IDs geholt.
      *
      * @param projektId Die ID des zu löschenden Projekts
+     * @param securityToken JWT Token für API-Authentifizierung
      * @return Ein DTO mit allen Informationen des gelöschten Projekts
      * @throws ResourceNotFoundException wenn das Projekt nicht existiert
      */
     public ProjektLoeschenResponseDto loescheProjekt(Long projektId, String securityToken) {
         ProjektEntity projekt = readById(projektId);
+        if (projekt == null) {
+            throw new ResourceNotFoundException("Das Projekt mit der ID " + projektId + " existiert nicht.");
+        }
 
         List<GeplanteQualifikationEntity> geplant = geplanteQualifikationRepository.getGeplanteQualifikationEntitiesByProjektId(projektId);
-        List<String> benoetigteQualifikationen = geplant.stream()
-                .map(GeplanteQualifikationEntity::getQualifikation)
-                .collect(Collectors.toList());
+        List<String> benoetigteQualifikationen = new ArrayList<>();
+
+        // Qualifikationsnamen über API anhand der IDs holen
+        for (GeplanteQualifikationEntity geplanteQual : geplant) {
+            SkillDto qualifikation = qualifikationApiService.getQualifikationById(geplanteQual.getQualifikationId(), securityToken);
+            if (qualifikation != null) {
+                benoetigteQualifikationen.add(qualifikation.getSkill());
+            }
+        }
 
         ProjektMitarbeiterGetDto mitarbeiterDto = holeProjektMitarbeiter(projektId, securityToken);
 

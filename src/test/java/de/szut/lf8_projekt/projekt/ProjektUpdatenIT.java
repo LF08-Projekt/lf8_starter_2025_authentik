@@ -1,7 +1,9 @@
 package de.szut.lf8_projekt.projekt;
 
 import de.szut.lf8_projekt.ValidationService;
+import de.szut.lf8_projekt.mitarbeiter.SkillDto;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationEntity;
+import de.szut.lf8_projekt.projekt.geplante_qualifikation.QualifikationApiService;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungEntity;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungRepository;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungService;
@@ -31,6 +33,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ProjektUpdatenIT extends AbstractIntegrationTest {
     @MockBean
     private ValidationService validationService;
+
+    @MockBean
+    private QualifikationApiService qualifikationApiService;
 
     private ProjektEntity setUpDefaultProjekt() {
         ProjektEntity entity = new ProjektEntity();
@@ -269,6 +274,22 @@ public class ProjektUpdatenIT extends AbstractIntegrationTest {
         when(validationService.validateKundenId(any(Long.class), nullable(String.class))).thenReturn(true);
         when(validationService.validateQualifications(any(), nullable(String.class))).thenReturn(true);
 
+        // Mock QualifikationApiService für getAllQualifikations
+        SkillDto crmSkill = new SkillDto();
+        crmSkill.setId(100L);
+        crmSkill.setSkill("CRM-Administration");
+
+        SkillDto datenschutzSkill = new SkillDto();
+        datenschutzSkill.setId(101L);
+        datenschutzSkill.setSkill("Datenschutz-Grundlagen");
+
+        SkillDto vertriebsSkill = new SkillDto();
+        vertriebsSkill.setId(102L);
+        vertriebsSkill.setSkill("Vertriebsschulung");
+
+        SkillDto[] allSkills = {crmSkill, datenschutzSkill, vertriebsSkill};
+        when(qualifikationApiService.getAllQualifikations(nullable(String.class))).thenReturn(allSkills);
+
         this.projektRepository.save(entity);
         final var contentAsString = this.mockMvc.perform(put("/LF08Projekt/Projekt/" + entity.getId())
                         .content(content)
@@ -304,7 +325,7 @@ public class ProjektUpdatenIT extends AbstractIntegrationTest {
         assertThat(loadedEntity.get().getStartdatum()).isNotNull();
         assertThat(loadedEntity.get().getGeplantesEnddatum()).isNotNull();
         assertThat(loadedEntity.get().getGeplantesEnddatum()).isNotNull();
-        assertThat(loadedQualifications.stream().map(GeplanteQualifikationEntity::getQualifikation).toList())
-                .containsExactlyInAnyOrder("CRM-Administration", "Datenschutz-Grundlagen", "Vertriebsschulung");
+        assertThat(loadedQualifications.stream().map(GeplanteQualifikationEntity::getQualifikationId).toList())
+                .containsExactlyInAnyOrder(100L, 101L, 102L);
     }
 }

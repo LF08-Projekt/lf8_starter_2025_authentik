@@ -196,7 +196,7 @@ public class ProjektController {
         List<GeplanteQualifikationEntity> geplanteQualifikationen = this.geplanteQualifikationService.readByProjektId(projekt_id);
 
         for (GeplanteQualifikationEntity geplanteQualifikation : geplanteQualifikationen) {
-            if (Objects.equals(geplanteQualifikation.getQualifikation(), skill.getSkill())) {
+            if (Objects.equals(geplanteQualifikation.getQualifikationId(), skill.getId())) {
                 qualifikationInProjekt = true;
                 break;
             }

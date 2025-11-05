@@ -3,6 +3,7 @@ package de.szut.lf8_projekt.projekt;
 import de.szut.lf8_projekt.Application;
 import de.szut.lf8_projekt.mitarbeiter.SkillDto;
 import de.szut.lf8_projekt.projekt.geplante_qualifikation.GeplanteQualifikationEntity;
+import de.szut.lf8_projekt.projekt.geplante_qualifikation.QualifikationApiService;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterApiService;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.MitarbeiterZuordnungEntity;
 import de.szut.lf8_projekt.projekt.mitarbeiter_zuordnung.dto.MitarbeiterDto;
@@ -29,6 +30,9 @@ public class ProjektLoeschenIT extends AbstractIntegrationTest {
 
     @MockBean
     private MitarbeiterApiService mitarbeiterApiService;
+
+    @MockBean
+    private QualifikationApiService qualifikationApiService;
 
     @Test
     void projektLoeschenOhneAuthentifizierung() throws Exception {
@@ -63,13 +67,24 @@ public class ProjektLoeschenIT extends AbstractIntegrationTest {
         // Geplante Qualifikationen
         GeplanteQualifikationEntity qual1 = new GeplanteQualifikationEntity();
         qual1.setProjektId(projekt.getId());
-        qual1.setQualifikation("Python");
+        qual1.setQualifikationId(10L);
         geplanteQualifikationRepository.save(qual1);
 
         GeplanteQualifikationEntity qual2 = new GeplanteQualifikationEntity();
         qual2.setProjektId(projekt.getId());
-        qual2.setQualifikation("Docker");
+        qual2.setQualifikationId(11L);
         geplanteQualifikationRepository.save(qual2);
+
+        // Mock Qualifikationen
+        SkillDto pythonSkill = new SkillDto();
+        pythonSkill.setId(10L);
+        pythonSkill.setSkill("Python");
+        when(qualifikationApiService.getQualifikationById(eq(10L), nullable(String.class))).thenReturn(pythonSkill);
+
+        SkillDto dockerSkill = new SkillDto();
+        dockerSkill.setId(11L);
+        dockerSkill.setSkill("Docker");
+        when(qualifikationApiService.getQualifikationById(eq(11L), nullable(String.class))).thenReturn(dockerSkill);
 
         // Mitarbeiter zuordnen
         MitarbeiterZuordnungEntity zuordnung1 = new MitarbeiterZuordnungEntity();
@@ -87,9 +102,6 @@ public class ProjektLoeschenIT extends AbstractIntegrationTest {
         mitarbeiter1.setId(100L);
         mitarbeiter1.setVorname("Peter");
         mitarbeiter1.setNachname("Python");
-        SkillDto pythonSkill = new SkillDto();
-        pythonSkill.setId(10L);
-        pythonSkill.setSkill("Python");
         mitarbeiter1.setSkillSet(Arrays.asList(pythonSkill));
         when(mitarbeiterApiService.getMitarbeiterById(ArgumentMatchers.eq(100L), nullable(String.class))).thenReturn(mitarbeiter1);
 
@@ -98,9 +110,6 @@ public class ProjektLoeschenIT extends AbstractIntegrationTest {
         mitarbeiter2.setId(101L);
         mitarbeiter2.setVorname("Diana");
         mitarbeiter2.setNachname("Docker");
-        SkillDto dockerSkill = new SkillDto();
-        dockerSkill.setId(11L);
-        dockerSkill.setSkill("Docker");
         mitarbeiter2.setSkillSet(Arrays.asList(dockerSkill));
         when(mitarbeiterApiService.getMitarbeiterById(ArgumentMatchers.eq(101L), nullable(String.class))).thenReturn(mitarbeiter2);
 

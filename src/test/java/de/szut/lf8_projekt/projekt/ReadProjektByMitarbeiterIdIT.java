@@ -43,7 +43,6 @@ public class ReadProjektByMitarbeiterIdIT extends AbstractIntegrationTest {
         projekt = projektRepository.save(projekt);
         GeplanteQualifikationEntity geplanteQualifikation = new GeplanteQualifikationEntity();
         geplanteQualifikation.setQualifikationId(1L);
-        geplanteQualifikation.setQualifikation("Java");
         geplanteQualifikation.setProjektId(projekt.getId());
         geplanteQualifikationRepository.save(geplanteQualifikation);
         return projekt;
