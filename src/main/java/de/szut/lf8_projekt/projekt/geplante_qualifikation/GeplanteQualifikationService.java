@@ -34,7 +34,4 @@ public class GeplanteQualifikationService {
         this.repository.delete(entity);
     }
 
-    public List<GeplanteQualifikationEntity> readByProjektId(Long projektId) {
-        return this.repository.getGeplanteQualifikationEntitiesByProjektId(projektId); //TODO
-    }
 }
