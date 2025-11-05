@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -192,20 +193,19 @@ public class ProjektController {
             throw new ResourceNotFoundException("Liste der geplanten Qualifikationen enthält eine ungültige Qualifikation");
         }
         if (dto.getGeplantesEnddatum() != null) {
-            Date neuesGeplantesEnddatum = dto.getGeplantesEnddatum();
-            if (neuesGeplantesEnddatum.after(previousSaveState.getGeplantesEnddatum())) {
-                List<MitarbeiterZuordnungEntity> mitarbeiterZuordnungEntities
-                        = mitarbeiterZuordnungService.getMitarbeiterZuordnungEntitiesByProjektId(projektId);
+            LocalDateTime neuesGeplantesEnddatum = dto.getGeplantesEnddatum();
+            List<ProjektEntity> possibleCollisions = this.projektService.readByDate(previousSaveState.getGeplantesEnddatum(), neuesGeplantesEnddatum);
+            for (ProjektEntity projektEntity : possibleCollisions) {
+                if (projektEntity.getId() != projektId) {
+                    List<MitarbeiterZuordnungEntity> mitarbeiterZuordnungEntities
+                            = mitarbeiterZuordnungService.getMitarbeiterZuordnungEntitiesByProjektId(projektId);
 
-                for (MitarbeiterZuordnungEntity mitarbeiterZuordnungEntity : mitarbeiterZuordnungEntities) {
-                    if (mitarbeiterZuordnungEntity.getProjektId() == projektId) continue;
-
-                    ProjektEntity kollisionsProjektEntity = this.projektService.readById(mitarbeiterZuordnungEntity.getProjektId());
-                    if (kollisionsProjektEntity.getStartdatum().after(previousSaveState.getGeplantesEnddatum())
-                        && neuesGeplantesEnddatum.after(kollisionsProjektEntity.getStartdatum())) {
-                        throw new ResourceConflictException("Mitarbeiter " + mitarbeiterZuordnungEntity.getMitarbeiterId() + " ist" +
-                                " zu diesem Zeit bereits in Projekt " + mitarbeiterZuordnungEntity.getProjektId() + " verplant." +
-                                " Bitte klären sie diesen Konflikt");
+                    for (MitarbeiterZuordnungEntity mitarbeiterZuordnungEntity : mitarbeiterZuordnungEntities) {
+                        if (mitarbeiterZuordnungService.projektHasMitarbeiter(projektEntity.getId(), mitarbeiterZuordnungEntity.getMitarbeiterId())) {
+                            throw new ResourceConflictException("Mitarbeiter " + mitarbeiterZuordnungEntity.getMitarbeiterId() + " ist" +
+                                    " zu diesem Zeit bereits in Projekt " + mitarbeiterZuordnungEntity.getProjektId() + " verplant." +
+                                    " Bitte klären sie diesen Konflikt");
+                        }
                     }
                 }
             }
